@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{/layout :: setContent(~{this :: content})}">
+  <th:block th:fragment="content">
+    <div class="inner">
+      <h1>NoticeBoard List</h1>
+      <div class="mb-2 d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="button" class="button special small">글쓰기</button>
+      </div>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 10%">번호</th>
+            <th scope="col" style="width: 50%">제목</th>
+            <th scope="col" style="width: 15%">작성자</th>
+            <th scope="col"style="width: 9%">등록일</th>
+            <th scope="col"style="width: 8%">조회수</th>
+            <th scope="col"style="width: 8%">추천수</th>
+          </tr>
+        </thead>
+        <tbody>
+        <th:block th:each="dto : ${result.dtoList}">
+          <tr th:onclick="|location.href='@{/noticeboard/read(id=${dto.id}, page=${result.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}'|">
+            <td>[[${dto.id}]]</td>
+            <td>[[${dto.title}]] ---- [<b th:text="${dto.commentCount}"></b>]</td>
+            <td>[[${dto.writerNickname}]]</td>
+            <td>[[${#temporals.format(dto.createDate, 'yy/MM/dd')}]]</td>
+            <td>[[${dto.viewNum}]]</td>
+            <td>[[${dto.recomendNum}]]</td>
+          </tr>
+        </th:block>
+        </tbody>
+      </table>
+      <ul class="pagination h-100 justify-content-center align-items-center" >
+        <li class="page-item" th:if="${result.prev}">
+          <a class="page-link" style="color: #e5474b"
+             th:href="@{/noticeboard/list(page=${result.start-1}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}" tabindex="-1">Previous</a>
+        </li>
+        <li th:class=" 'page-item' + ${result.page == page? 'active': ''}" th:each="page: ${result.pageList}">
+          <a class="page-link" style="color: #e5474b"
+             th:href="@{/noticeboard/list(page=${page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">[[${page}]]</a>
+        </li>
+        <li class="page-item" th:if="${result.next}">
+          <a class="page-link" style="color: #e5474b"
+             th:href="@{/noticeboard/list(page=${result.end+1}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">Next</a>
+        </li>
+      </ul>
+    </div>
+    <script th:inline="javascript">
+      $(document).ready(function (){
+        function rowClick(id, page, type, keyowrd){
+          location.href = `/noticeboard/read/id=${id},page=${page},type=${type}, keyword=${keyowrd}`;
+        }
+      });
+    </script>
+  </th:block>
+</th:block>

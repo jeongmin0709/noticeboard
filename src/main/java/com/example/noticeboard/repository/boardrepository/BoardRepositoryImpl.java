@@ -45,8 +45,8 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
     public Page<Object[]> getBoardPage(String type, String keyword, Pageable pageable) {
 
         List<Tuple> result = queryFactory.select(board, comment.count())
-                .from(board).join(board.member).fetchJoin()
-                .join(comment).on(board.eq(comment.board))
+                .from(board).leftJoin(board.member).fetchJoin()
+                .leftJoin(comment).on(board.eq(comment.board))
                 .where(
                         titleEq(type, keyword),
                         contentEq(type, keyword),
@@ -60,7 +60,8 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .groupBy(board)
                 .fetch();
-        return new PageImpl<>(result.stream().map(tuple -> tuple.toArray()).collect(Collectors.toList()), pageable, result.size());
+        Long count = queryFactory.select(board.count()).from(board).fetchOne();
+        return new PageImpl<>(result.stream().map(tuple -> tuple.toArray()).collect(Collectors.toList()), pageable, count);
     }
 
     private BooleanExpression titleEq(String type, String keyword) {

@@ -1,0 +1,88 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!--
+	Introspect by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+<th:block th:fragment="setContent(content)">
+<html>
+	<head>
+		<title>Generic - Introspect by TEMPLATED</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link th:href="@{/assets/css/main.css}" rel="stylesheet" />
+		<link th:href="@{/assets/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+
+		<!-- Scripts -->
+		<script th:src="@{/assets/js/jquery.min.js}"></script>
+		<script th:src="@{/assets/js/skel.min.js}"></script>
+		<script th:src="@{/assets/js/util.js}"></script>
+		<script th:src="@{/assets/js/main.js}"></script>
+		<script th:src="@{/asserts/bootstrap/js/bootstrap.bundle.min.js}"></script>
+	</head>
+	<body>
+
+		<!-- Header -->
+			<header id="header">
+				<div class="inner">
+					<a href="index.html" class="logo">Board Service</a>
+					<nav id="nav">
+						<a href="index.html">Home</a>
+						<a href="generic.html">로그인</a>
+						<a href="elements.html">회원가입</a>
+					</nav>
+				</div>
+			</header>
+			<a href="#menu" class="navPanelToggle"><span class="fa fa-bars"></span></a>
+
+		<!-- Main -->
+			<section id="main" >
+				<th:block th:replace="${content}">
+				<div class="inner">
+					<header class="major special">
+						<h1>Generic</h1>
+						<p>Lorem ipsum dolor sit amet nullam id egestas urna aliquam</p>
+					</header>
+					<a href="#" class="image fit"><img src="images/pic11.jpg" alt="" /></a>
+					<p>Vis accumsan feugiat adipiscing nisl amet adipiscing accumsan blandit accumsan sapien blandit ac amet faucibus aliquet placerat commodo. Interdum ante aliquet commodo accumsan vis phasellus adipiscing. Ornare a in lacinia. Vestibulum accumsan ac metus massa tempor. Accumsan in lacinia ornare massa amet. Ac interdum ac non praesent. Cubilia lacinia interdum massa faucibus blandit nullam. Accumsan phasellus nunc integer. Accumsan euismod nunc adipiscing lacinia erat ut sit. Arcu amet. Id massa aliquet arcu accumsan lorem amet accumsan.</p>
+					<p>Amet nibh adipiscing adipiscing. Commodo ante vis placerat interdum massa massa primis. Tempus condimentum tempus non ac varius cubilia adipiscing placerat lorem turpis at. Aliquet lorem porttitor interdum. Amet lacus. Aliquam lobortis faucibus blandit ac phasellus. In amet magna non interdum volutpat porttitor metus a ante ac neque. Nisi turpis. Commodo col. Interdum adipiscing mollis ut aliquam id ante adipiscing commodo integer arcu amet Ac interdum ac non praesent. Cubilia lacinia interdum massa faucibus blandit nullam. Accumsan phasellus nunc integer. Accumsan euismod nunc adipiscing lacinia erat ut sit. Arcu amet. Id massa aliquet arcu accumsan lorem amet accumsan commodo odio cubilia ac eu interdum placerat placerat arcu commodo lobortis adipiscing semper ornare pellentesque.</p>
+					<p>Amet nibh adipiscing adipiscing. Commodo ante vis placerat interdum massa massa primis. Tempus condimentum tempus non ac varius cubilia adipiscing placerat lorem turpis at. Aliquet lorem porttitor interdum. Amet lacus. Aliquam lobortis faucibus blandit ac phasellus. In amet magna non interdum volutpat porttitor metus a ante ac neque. Nisi turpis. Commodo col. Interdum adipiscing mollis ut aliquam id ante adipiscing commodo integer arcu amet blandit adipiscing arcu ante.</p>
+				</div>
+				</th:block>
+			</section>
+
+		<!-- Footer -->
+			<section id="footer">
+				<div class="inner">
+					<header>
+						<h2>Board Service</h2>
+					</header>
+					<div class="copyright">
+						<b>email: tjrwjdals7@naver.com<br></b>
+						<b>Phone number: 010-9563-0712</b>
+					</div>
+				</div>
+			</section>
+	</body>
+	<style>
+		html, body {
+			height: 100%
+		}
+
+		#main {
+			min-height: 100%;
+			position: relative;
+			padding-bottom: 60px;
+		}
+
+		#footer {
+			position: relative; (absolute -> relative)
+			transform: translatY(-100%);
+		}
+		tbody tr:hover {
+			background: #fceced;
+		}
+	</style>
+</html>
+</th:block>

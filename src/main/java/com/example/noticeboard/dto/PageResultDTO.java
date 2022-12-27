@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Data
-@ToString
+@ToString(exclude = "dtoList")
 public class PageResultDTO<DTO, EN> {
     //DTO리스트
     private List<DTO> dtoList;

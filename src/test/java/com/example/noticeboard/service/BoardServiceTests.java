@@ -17,6 +17,7 @@ public class BoardServiceTests {
     public void getBoardList(){
         PageRequestDTO pageRequestDTO = new PageRequestDTO();
         PageResultDTO<BoardDTO, Object[]> result = boardService.getList(pageRequestDTO);
+        System.out.println("result = " + result.getTotalPage());
         for(BoardDTO boardDTO: result.getDtoList()){
             System.out.println(boardDTO);
         }
