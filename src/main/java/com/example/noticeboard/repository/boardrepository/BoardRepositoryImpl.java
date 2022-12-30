@@ -75,7 +75,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
     }
 
     private BooleanExpression writerEq(String type, String keyword) {
-        if(type != null) return type.contains("w") ? board.member.name.containsIgnoreCase(keyword) : null;
+        if(type != null) return type.contains("w") ? board.member.username.containsIgnoreCase(keyword) : null;
         else return null;
     }
 

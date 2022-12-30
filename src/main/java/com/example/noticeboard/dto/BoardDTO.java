@@ -17,7 +17,7 @@ public class BoardDTO {
 
     private String content;
 
-    private String writerNickname;
+    private String writer;
 
     private int recomendNum;
 

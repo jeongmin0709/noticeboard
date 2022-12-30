@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{/layout :: setContent(~{this :: content})}">
+    <th:block th:fragment="content">
+            <form th:action="@{/noticeboard/signup}" th:method="post">
+            <div class="m-auto w-25" style="min-width: 380px">
+                <div class="d-flex justify-content-center">
+                    <h2 class="pb-3 m-auto"><b>회원 가입</b></h2>
+                </div>
+                <div class="form-group">
+                    <label>아이디</label>
+                    <input type="text" name="username" placeholder="아이디" autocomplete="off">
+                    <span id="usernameMsg"></span>
+                </div>
+                <div class="form-group">
+                    <label>비밀번호</label>
+                    <input type="password" name="password"  placeholder="비밀번호" autocomplete="off">
+                    <span id="passwordMsg"></span>
+                </div>
+                <div class="form-group">
+                    <label>비밀번호 재확인</label>
+                    <input type="password" name="password2"  placeholder="비밀번호 재확인">
+                    <span id="password2Msg"></span>
+                </div>
+                <div class="form-group">
+                    <label>본인확인 이메일</label>
+                    <div class="row">
+                        <div class="pr-1 col-8"><input type="email" name="email"  placeholder="이메일"></div>
+                        <div class="pl-1 col-4"><button class="px-0 but special fit small" id="emailbtn" type="button">인증번호  받기</button></div>
+                    </div>
+                    <input type="text" maxlength="6" name="authNum" placeholder="인증번호를 입력하세요">
+                    <span id="emailMsg"></span>
+                </div>
+                <button class="btn special fit small" type="submit">가입하기</button>
+            </div>
+        </form>
+        <script>
+            $(document).ready(function (){
+                let checkUsername = false;
+                let checkPassowrd = false;
+                let checkPassowrd2 = false;
+                let checkEmail = false;
+
+                $("form").submit(function () {
+                    checkEmail = true;
+                    if(checkUsername && checkPassowrd && checkPassowrd2 && checkEmail){
+                        $("input[name='password2']").attr("disabled","disabled");
+                        $("input[name='authNum']").attr("disabled","disabled");
+                        return true;
+                    }
+                    return false;
+                })
+
+                // 이메일 인증번호 이벤트
+                $("#emailbtn").click(function () {
+                    $.ajax({
+                        url: '/noticeboard/emailcheck',
+                        method: 'post',
+                        data: {email:$("input[name='email']").val()},
+                        success: function (data){
+                            let code = data;
+                            $("#emailMsg").css({"color":"blue","font-size":"0.4em"})
+                                .text("해당메일로 인증번호를 발송되었습니다.")
+
+                            // 코드가 일치하는지 확인
+                            $("input[name='authNum']").blur(function (){
+                                if(code == this.value) {
+                                    $("#emailMsg").css({"color": "blue", "font-size": "0.4em"})
+                                        .text("인증이 완료되었습니다.")
+                                    checkEmail = true;
+                                }else {
+                                    $("#emailMsg").css({"color": "red", "font-size": "0.4em"})
+                                        .text("인증번호가 일치하지 않습니다.")
+                                }
+                            });
+                        },
+                        error: function (request,status,error) {
+                            $("#emailMsg").css({"color": "red", "font-size": "0.4em"})
+                                .text("이메일을 다시 확인해 주세요.")
+                        }
+                    });
+                });
+
+                <!--아이디 유효성 검사-->
+                $("input[name='username']").blur(function () {
+                    let usermane = this.value;
+                    let exp = RegExp(/^[A-Za-z0-9_\-]{5,20}$/);
+                    let msg = $("#usernameMsg");
+                    if(usermane == ""){
+                        msg.css({"color":"red","font-size":"0.4em"})
+                            .text("아이디를 입력해 주세요.");
+                        checkUsername = false;
+                    } else{
+                        if(exp.test(usermane)) {
+                            $.ajax({
+                                url: '/noticeboard/checkusername',
+                                method: 'post',
+                                data: {username:usermane},
+                                success: function (data){
+                                    if(data){
+                                        msg.css({"color":"blue","font-size":"0.4em"})
+                                            .text("유효한 아이디입니다.");
+                                        checkUsername = true;
+                                    }else{
+                                        msg.css({"color":"red","font-size":"0.4em"})
+                                            .text("이미 사용중인 아이디입니다.");
+                                        checkUsername = false;
+                                    }
+                                }
+                            });
+                        } else {
+                            msg.removeAttr("style").css({"color":"red","font-size":"0.4em"})
+                                .text("5~20자의 영문 소문자, 숫자와 특수기호(_),(-)만 사용 가능합니다.");
+                            checkUsername = false;
+                        }
+                    }
+                });
+
+                <!--비밀번호 유효성 검사-->
+                $("input[name='password']").blur(function () {
+                    let password1 = this.value;
+                    let exp = RegExp(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,16}$/); // 최소한개의 영문자, 숫자, 특수문자
+                    let msg = $("#passwordMsg");
+                    if(password1 == ""){
+                        msg.css({"color":"red","font-size":"0.4em"})
+                            .text("비밀번호를 입력해 주세요.")
+                        checkPassowrd = false;
+                    }else {
+                        if(exp.test(password1)) {
+                            msg.removeAttr("style").css({"color":"blue","font-size":"0.4em"})
+                                .text("유효한 비밀번호입니다.");
+                            checkPassowrd = true;
+                        } else {
+                            msg.removeAttr("style").css({"color":"red","font-size":"0.4em"})
+                                .text("8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.");
+                            checkPassowrd = false;
+                        }
+                    }
+                });
+
+                <!--비밀번호와 비밀번호 재확인이 동일한지 검사-->
+                $("input[name='password2']").blur(function () {
+                    let password2 = this.value;
+                    let msg = $("#password2Msg");
+                    if(password2 == ""){
+                        msg.css({"color":"red","font-size":"0.4em"})
+                            .text("비밀번호를 입력해 주세요.");
+                        checkPassowrd2 = false;
+                    } else {
+                        if($("input[name='password']").val() == password2) {
+                            msg.text("");
+                            checkPassowrd2 = true;
+                        }else{
+                            msg.removeAttr("style").css({"color":"red","font-size":"0.4em"})
+                                .text("비밀번호가 일치하지 않습니다.");
+                            checkPassowrd2= false;
+                        }
+                    }
+                });
+            });
+        </script>
+    </th:block>
+</th:block>

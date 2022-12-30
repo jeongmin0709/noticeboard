@@ -7,6 +7,8 @@
       <div class="mb-2 d-grid gap-2 d-md-flex justify-content-md-end">
         <button type="button" class="button special small">글쓰기</button>
       </div>
+
+      <!--list table -->
       <table class="table table-hover">
         <thead>
           <tr>
@@ -23,7 +25,7 @@
           <tr th:onclick="|location.href='@{/noticeboard/read(id=${dto.id}, page=${result.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}'|">
             <td>[[${dto.id}]]</td>
             <td>[[${dto.title}]] ---- [<b th:text="${dto.commentCount}"></b>]</td>
-            <td>[[${dto.writerNickname}]]</td>
+            <td>[[${dto.writer}]]</td>
             <td>[[${#temporals.format(dto.createDate, 'yy/MM/dd')}]]</td>
             <td>[[${dto.viewNum}]]</td>
             <td>[[${dto.recomendNum}]]</td>
@@ -31,6 +33,8 @@
         </th:block>
         </tbody>
       </table>
+
+      <!--pagination -->
       <ul class="pagination h-100 justify-content-center align-items-center" >
         <li class="page-item" th:if="${result.prev}">
           <a class="page-link" style="color: #e5474b"
@@ -46,12 +50,6 @@
         </li>
       </ul>
     </div>
-    <script th:inline="javascript">
-      $(document).ready(function (){
-        function rowClick(id, page, type, keyowrd){
-          location.href = `/noticeboard/read/id=${id},page=${page},type=${type}, keyword=${keyowrd}`;
-        }
-      });
-    </script>
+
   </th:block>
 </th:block>

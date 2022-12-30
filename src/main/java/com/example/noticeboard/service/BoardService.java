@@ -5,7 +5,6 @@ import com.example.noticeboard.dto.BoardDTO;
 import com.example.noticeboard.dto.PageRequestDTO;
 import com.example.noticeboard.dto.PageResultDTO;
 import com.example.noticeboard.entity.Board;
-import com.example.noticeboard.entity.member.Member;
 
 public interface BoardService {
 
@@ -17,7 +16,7 @@ public interface BoardService {
                 .id(board.getId())
                 .title(board.getTitle())
                 .content(board.getContent())
-                .writerNickname(board.getMember().getNickname())
+                .writer(board.getMember().getUsername())
                 .recomendNum(board.getRecomendNum())
                 .viewNum(board.getViewNum())
                 .commentCount(commentCount.intValue())
@@ -25,5 +24,4 @@ public interface BoardService {
                 .modDate(board.getModDate())
                 .build();
     }
-
 }

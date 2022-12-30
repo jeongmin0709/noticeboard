@@ -18,8 +18,9 @@ public class CommentRepositoryTests {
     @Test
     public void insertComment(){
         IntStream.rangeClosed(1, 300).forEach(i->{
-            Member member = Member.builder().build();
-            member.setId(Long.valueOf((int)(Math.random()*99+1)));
+            Member member = Member.builder()
+                    .username("Member"+Long.valueOf((int)(Math.random()*99+1)))
+                    .build();
             Board board = Board.builder().build();
             board.setId(Long.valueOf((int)(Math.random()*199+1)));
             Comment comment = Comment.builder()
@@ -36,7 +37,7 @@ public class CommentRepositoryTests {
         board.setId(100L);
         List<Comment> comments = commentRepository.getCommentsByBoardOrderById(board);
         for (Comment comment : comments) {
-            System.out.println("comment.getMember(). = " + comment.getMember().getNickname());
+            System.out.println("comment.getMember(). = " + comment.getMember().getUsername());
         }
     }
 }

@@ -12,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -25,8 +24,8 @@ public class BoardRepositoryTests {
     @Test
     public void insertBoard(){
         IntStream.rangeClosed(1, 200).forEach(i->{
-            Member member = Member.builder().build();
-            member.setId(Long.valueOf((int)(Math.random()*99+1)));
+            Member member = Member.builder()
+                    .username("Member"+Long.valueOf((int)(Math.random()*99+1))).build();
             Board board = Board.builder()
                     .title("title..."+ i)
                     .member(member)
@@ -41,7 +40,7 @@ public class BoardRepositoryTests {
         Optional<Board> result = boardRepository.getBoardWithMember(id);
         if(result.isPresent()){
             Board board = result.get();
-            System.out.println("nickname = " + board.getMember().getNickname());
+            System.out.println("nickname = " + board.getMember().getUsername());
         }
     }
     @Test

@@ -3,53 +3,42 @@ package com.example.noticeboard.entity.member;
 
 import com.example.noticeboard.entity.BaseEntity;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @ToString
+@Builder
 public class Member extends BaseEntity {
 
     @Id
-    @Column(name = "MEMBER_ID")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String username;
 
-    @Column(unique = true)
-    private String nickname;
+    private String password;
 
-    @Column(unique = true)
     private String email;
 
-    private String name;
-
-    private LocalDate birth_date;
-
-    @Enumerated(value = EnumType.STRING)
-    private Gender gender;
-
-    @Enumerated(value = EnumType.STRING)
-    private Role role;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roleSet = new HashSet<>();
 
     private boolean fromSocial;
 
 
-    @Builder
-    public Member(String nickname, String email, String name, LocalDate birth_date, Gender gender, Role role, boolean fromSocial) {
-        this.nickname = nickname;
-        this.email = email;
-        this.name = name;
-        this.birth_date = birth_date;
-        this.gender = gender;
-        this.role = role;
-        this.fromSocial = fromSocial;
-    }
+    public void changePassword(String password){this.password = password;}
+    public void addRole(Role role){roleSet.add(role);}
+    public void removeRole(Role role){roleSet.remove(role);}
 
-    public void changeNickname(String nickname){this.nickname = nickname;}
-    public void changeEmail(String email){this.email = email;}
-    public void changeRole(Role role){this.role = role;}
-    public void setId(Long id){this.id = id;}//테스트용
 }
