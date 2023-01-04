@@ -18,7 +18,6 @@ import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -27,25 +26,27 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     private QBoard board = QBoard.board;
-    private QImage image = QImage.image;
     private QComment comment = QComment.comment;
+    private QImage image = QImage.image;
 
     @Override
-    public Optional<Board> getBoardWithMember(Long id) {
+    public List<Object[]> getBoardWithAll(Long id) {
 
-        List<Board> reuslt = queryFactory.selectFrom(board)
-                .join(board.member).fetchJoin()
-                .join(image).on(board.eq(image.board))
+        List<Tuple> result = queryFactory.select(board, image)
+                .from(board)
+                .leftJoin(image).on(board.eq(image.board))
+                .leftJoin(board.member).fetchJoin()
+                .where(board.id.eq(id))
                 .fetch();
-
-        return Optional.empty();
+        return result.stream().map(tuple -> tuple.toArray()).collect(Collectors.toList());
     }
+
 
     @Override
     public Page<Object[]> getBoardPage(String type, String keyword, Pageable pageable) {
 
         List<Tuple> result = queryFactory.select(board, comment.count())
-                .from(board).leftJoin(board.member).fetchJoin()
+                .from(board).join(board.member).fetchJoin()
                 .leftJoin(comment).on(board.eq(comment.board))
                 .where(
                         titleEq(type, keyword),
@@ -60,7 +61,15 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .groupBy(board)
                 .fetch();
-        Long count = queryFactory.select(board.count()).from(board).fetchOne();
+
+        Long count = queryFactory.select(board.count())
+                .from(board)
+                .where(
+                        titleEq(type, keyword),
+                        contentEq(type, keyword),
+                        writerEq(type, keyword)
+                )
+                .fetchOne();
         return new PageImpl<>(result.stream().map(tuple -> tuple.toArray()).collect(Collectors.toList()), pageable, count);
     }
 

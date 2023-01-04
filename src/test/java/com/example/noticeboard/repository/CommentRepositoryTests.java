@@ -21,8 +21,7 @@ public class CommentRepositoryTests {
             Member member = Member.builder()
                     .username("Member"+Long.valueOf((int)(Math.random()*99+1)))
                     .build();
-            Board board = Board.builder().build();
-            board.setId(Long.valueOf((int)(Math.random()*199+1)));
+            Board board = Board.builder().id(Long.valueOf((int)(Math.random()*199+1))).build();
             Comment comment = Comment.builder()
                     .content("content..."+i)
                     .board(board)
@@ -33,8 +32,7 @@ public class CommentRepositoryTests {
     }
     @Test
     public void getByBoard(){
-        Board board = Board.builder().build();
-        board.setId(100L);
+        Board board = Board.builder().id(100L).build();
         List<Comment> comments = commentRepository.getCommentsByBoardOrderById(board);
         for (Comment comment : comments) {
             System.out.println("comment.getMember(). = " + comment.getMember().getUsername());

@@ -1,4 +1,4 @@
-package com.example.noticeboard.service;
+package com.example.noticeboard.security;
 
 import com.example.noticeboard.dto.MemberDTO;
 import com.example.noticeboard.entity.member.Member;
@@ -11,16 +11,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
 @Log4j2
 @RequiredArgsConstructor
+@Transactional
 public class MemberDetailsService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
+
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("Username: "+username);
@@ -32,7 +34,6 @@ public class MemberDetailsService implements UserDetailsService {
         log.info("-------------------------------");
         log.info(member);
 
-
         // entity to DTO
         MemberDTO memberDTO = MemberDTO.builder()
                 .username(member.getUsername())
@@ -43,15 +44,5 @@ public class MemberDetailsService implements UserDetailsService {
                 .build();
         return memberDTO;
     }
-    public void signUp(MemberDTO memberDTO){
-        //DTOtoEntity
-        Member member = Member.builder()
-                .username(memberDTO.getUsername())
-                .password(passwordEncoder.encode(memberDTO.getPassword()))
-                .email(memberDTO.getEmail())
-                .fromSocial(false)
-                .build();
-        member.addRole(Role.ROLE_USER);
-        memberRepository.save(member);
-    }
+
 }

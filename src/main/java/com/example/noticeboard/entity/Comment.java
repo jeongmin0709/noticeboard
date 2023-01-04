@@ -7,8 +7,10 @@ import javax.persistence.*;
 
 @Entity
 @Getter
-@ToString(exclude = {"board", "member"})
+@ToString
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
 public class Comment extends BaseEntity{
 
     @Id
@@ -18,10 +20,12 @@ public class Comment extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "BOARD_ID", nullable = false)
+    @ToString.Exclude
     private Board board;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID", nullable = false)
+    @ToString.Exclude
     private Member member;
 
     @Column(columnDefinition = "TEXT")
@@ -29,13 +33,6 @@ public class Comment extends BaseEntity{
 
     private int recomendNum;
 
-    @Builder
-    public Comment(Board board, Member member, String content) {
-        this.board = board;
-        this.member = member;
-        this.content = content;
-        this.recomendNum = 0;
-    }
 
     public void changeContent(String content){this.content = content;}
     public void addRecomendNum(){recomendNum++;}

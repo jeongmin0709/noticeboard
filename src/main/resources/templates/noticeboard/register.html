@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<th:block th:replace="~{/layout :: setContent(~{this :: content})}">
+  <th:block th:fragment="content">
+    <div class="inner" style="max-width: 900px">
+      <h1>NoticeBoard Register</h1>
+      <form th:action="@{/noticeboard/register}" th:method="post">
+        <input type="hidden" name="writer" th:value="${#authentication.name}">
+        <div class="form-group">
+          <h5><strong>제목</strong></h5>
+          <input type="text" name="title" placeholder="제목">
+        </div>
+        <div class="form-group">
+          <label>내용</label>
+          <textarea name="content" placeholder="내용을 입력해 주세요." rows="10"></textarea>
+        </div>
+
+        <div class="uploadResult">
+          <ul>
+          </ul>
+        </div>
+
+        <div class="form-group fileForm">
+          <label>이미지</label>
+          <div class="custom-file">
+            <input type="file" class="custom-file-input files" id="fileInput" multiple>
+            <label class="custom-file-label" data-browse="Browse"></label>
+            <span id="imgMsg"></span>
+          </div>
+        </div>
+        <div class="box" style="border: none; margin: 0px; padding: 0px">
+        </div>
+        <button type="submit" class="btn special" id="submitBtn">작성 완료</button>
+      </form>
+    </div>
+
+    <style>
+      .uploadResult{
+        width: 100%;
+        background-color: #f8d1d2;
+        margin-top: 5px;
+      }
+      .uploadResult ul{
+        vertical-align: top;
+        display: flex;
+        padding: 0 22px;
+      }
+      .uploadResult ul li{
+        list-style: none;
+        width: 140px;
+        height: 150px;
+        position: relative;
+        margin: 15px;
+        display: flex;
+        padding: 0px;
+      }
+      .uploadResult ul li img{
+        position: absolute;
+        width: 160px;
+        clip: rect( 0, 140px, 150px, 0 );
+        z-index: 0;
+      }
+      .uploadResult ul li button{
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+        position: absolute;
+        right: 0px;
+        z-index: 1;
+      }
+    </style>
+
+    <script>
+      $(document).ready(function (e){
+        let checkImg = false;
+
+        function ckeckExtension(fileName, fileSize) {
+          let regex = new RegExp("\\.(bmp|gif|jpg|jpeg|png)$");
+          let maxSize = 10485760;
+          if(fileSize >= maxSize){
+            $("#imgMsg").css({"color":"red","font-size":"0.6em"})
+                    .text("파일 사이즈 초과");
+            return false;
+          }
+          if(!regex.test(fileName)){
+            $("#imgMsg").css({"color":"red","font-size":"0.6em"})
+                    .text("해당 종류의 파일은 업로드할 수 없습니다.");
+            return false;
+          }
+          return true;
+        }
+
+        function showResult(ImageDTOList) {
+          let uploadUL = $(".uploadResult ul");
+          let str = "";
+          $(ImageDTOList).each(function (i, ImageDTO){
+            str += "<li data-name='"+ImageDTO.fileName + "' data-path='"+ImageDTO.folderPath +"' data-uuid='"+ImageDTO.uuid+"'>";
+            str += "<button type='button' data-file=\'"+ImageDTO.imageURL +"\' "
+            str += "class='btn-warning btn-sm'>X</button>";
+            str += "<img src='/display?fileName="+ImageDTO.thumbnailURL+"'>";
+            str + "</li>";
+          });
+          uploadUL.append(str);
+        }
+
+        $(".custom-file-input").change(function (){
+          let fileName = $(this).val().split("\\").pop();
+          $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+          let formData = new FormData();
+          let inputFile = $(this);
+          let files = inputFile[0].files;
+          let appended= false;
+          let leftNum = 5-$(".uploadResult ul").children().length;
+          if(leftNum < 1){
+            alert("이미지는 최대 5개까지 업로드할 수 있습니다.");
+            return false;
+          }
+          if(files.length>leftNum){
+            alert("이미지는 최대 5개까지 업로드할 수 있습니다.");
+          }
+          let length = files.length<leftNum ? files.length:leftNum;
+          for(let i = 0; i< length ; i++){
+            if(!ckeckExtension(files[i].name, files[i].size)){
+              return false;
+            }
+            console.log(files[i]);
+            formData.append("uploadImgs", files[i]);
+            appended = true;
+          }
+          if(!appended){return ;}
+          $.ajax({
+            url: '/upload',
+            processData: false,
+            contentType: false,
+            data: formData,
+            type: 'POST',
+            dataType: 'json',
+            success: function (ImageDTOList){
+              console.log(ImageDTOList);
+              showResult(ImageDTOList);
+            },
+            error: function (jqXHR, textStatus, errorThrown){
+              console.log(textStatus);
+            }
+          });
+        });
+
+        $(".uploadResult").on("click", "li button", function (e){
+          let targetImg = $(this).data("file");
+          let targetLI = $(this).closest("li");
+          $.ajax({
+            url:'/removeImg',
+            data: {imgName: targetImg},
+            dataType: 'text',
+            type: 'delete',
+            success: function (result){
+              targetLI.remove();
+            }
+          });
+
+        });
+        $("#submitBtn").on("click", function (e) {
+          e.preventDefault();
+          var str="";
+          $(".uploadResult li").each(function (i, ImageDTO){
+            let target = $(ImageDTO);
+            str += "<input type='hidden' name='imageDTOList["+i+"].fileName' value='"+target.data('name')+"'>";
+            str += "<input type='hidden' name='imageDTOList["+i+"].folderPath' value='"+target.data('path')+"'>";
+            str += "<input type='hidden' name='imageDTOList["+i+"].uuid' value='"+target.data('uuid')+"'>";
+          });
+          // 태그들이 추가된 것을 확인한 후에 comment를 제거
+          $(".box").html(str);
+          $("form").submit();
+        })
+      });
+    </script>
+
+  </th:block>
+</th:block>

@@ -31,6 +31,7 @@ public class Member extends BaseEntity {
 
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     @Enumerated(EnumType.STRING)
     private Set<Role> roleSet = new HashSet<>();
 

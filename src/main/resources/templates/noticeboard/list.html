@@ -4,8 +4,8 @@
   <th:block th:fragment="content">
     <div class="inner">
       <h1>NoticeBoard List</h1>
-      <div class="mb-2 d-grid gap-2 d-md-flex justify-content-md-end">
-        <button type="button" class="button special small">글쓰기</button>
+      <div class="mb-2  d-flex justify-content-end">
+        <a th:href="@{/noticeboard/register(page=${result.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}" class="button special">글쓰기</a>
       </div>
 
       <!--list table -->
@@ -49,7 +49,45 @@
              th:href="@{/noticeboard/list(page=${result.end+1}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">Next</a>
         </li>
       </ul>
-    </div>
 
+      <form action="/noticeboard/list" method="get" id="searchForm">
+        <div class="input-group">
+          <input type="hidden" name="page" value="1">
+          <div class="input-group-prepend">
+            <select class="custom-select" name="type">
+              <option value="t" th:selected="${pageRequestDTO.type == 't'}">제목</option>
+              <option value="c" th:selected="${pageRequestDTO.type == 'c'}">내용</option>
+              <option value="w" th:selected="${pageRequestDTO.type == 'w'}">작성자</option>
+              <option value="tc" th:selected="${pageRequestDTO.type == 'tc'}">제목 + 내용</option>
+              <option value="tcw" th:selected="${pageRequestDTO.type == 'tcw'}">제목 + 내용 + 작성자</option>
+            </select>
+          </div>
+          <input class="form-control" name="keyword" th:value="${pageRequestDTO.keyword}">
+          <div class="input-group-append" id="button-addon4">
+            <button class="btn alt small btn-search" type="button">검색</button>
+            <button class="btn alt small btn-clear" type="button">Clear</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <style>
+      .input-group{
+        margin: 70px auto;
+        max-width: 600px;
+      }
+      .input-group button{
+        height: 39px;
+        width: 60px;
+      }
+    </style>
+    <script th:inline="javascript">
+      var searchForm = $("#searchForm");
+      $('.btn-search').click(function (e){
+        searchForm.submit();
+      });
+      $('.btn-clear').click(function (e){
+        searchForm.empty().submit();
+      });
+    </script>
   </th:block>
 </th:block>

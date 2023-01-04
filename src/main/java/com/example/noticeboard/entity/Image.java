@@ -5,10 +5,11 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@NoArgsConstructor
+@ToString
+@Getter
 @Builder
-@ToString(exclude = "board")
 public class Image {
 
     @Id
@@ -18,6 +19,7 @@ public class Image {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "BOARD_ID", nullable = false)
+    @ToString.Exclude
     private Board board;
 
     private String name;
@@ -25,4 +27,5 @@ public class Image {
     private String path;
 
     private String uuid;
+
 }

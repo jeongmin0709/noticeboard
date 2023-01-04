@@ -3,6 +3,7 @@ package com.example.noticeboard.service;
 import com.example.noticeboard.dto.BoardDTO;
 import com.example.noticeboard.dto.PageRequestDTO;
 import com.example.noticeboard.dto.PageResultDTO;
+import com.example.noticeboard.entity.Board;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,6 @@ public class BoardServiceTests {
         for(BoardDTO boardDTO: result.getDtoList()){
             System.out.println(boardDTO);
         }
-
     }
+
 }

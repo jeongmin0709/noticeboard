@@ -26,11 +26,18 @@
 		<!-- Header -->
 			<header id="header">
 				<div class="inner">
-					<a href="index.html" class="logo">Board Service</a>
+					<a th:href="@{/noticeboard/list}" class="logo">Board Service</a>
 					<nav id="nav">
-						<a th:href="@{/noticeboard/list}">Home</a>
-						<a th:href="@{/noticeboard/login}">로그인</a>
-						<a th:href="@{/noticeboard/signup}">회원가입</a>
+						<th:block th:if="${#authorization.expr('isAuthenticated()')}">
+							<a th:href="@{/noticeboard/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">Home</a>
+							<a th:href="@{/noticeboard/logout(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">로그아웃</a>
+							<a style="text-transform: none">[[${#authentication.name}]] 님</a>
+						</th:block>
+						<th:block th:unless="${#authorization.expr('isAuthenticated()')}">
+							<a th:href="@{/noticeboard/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">Home</a>
+							<a th:href="@{/noticeboard/loginForm(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">로그인</a>
+							<a th:href="@{/noticeboard/signup(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">회원가입</a>
+						</th:block>
 					</nav>
 				</div>
 			</header>

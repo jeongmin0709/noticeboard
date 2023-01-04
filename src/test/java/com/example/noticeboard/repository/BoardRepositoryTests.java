@@ -34,15 +34,14 @@ public class BoardRepositoryTests {
             boardRepository.save(board);
         });
     }
-    @Test
-    public void findOne(){
-        Long id = 123L;
-        Optional<Board> result = boardRepository.getBoardWithMember(id);
-        if(result.isPresent()){
-            Board board = result.get();
-            System.out.println("nickname = " + board.getMember().getUsername());
-        }
-    }
+//    @Test
+//    public void findOne(){
+//        Long id = 204L;
+//        Board board = boardRepository.getBoardWithMember(id);
+//        System.out.println("result = " + board.getImageList());
+////        System.out.println("image = " + board.getImageList());
+////        System.out.println("count = " + count);
+//    }
     @Test
     public void getBoardList(){
         Pageable pageable = PageRequest.of(0, 10, Sort.by("id").descending());
@@ -52,5 +51,6 @@ public class BoardRepositoryTests {
             System.out.println(Arrays.toString(arr));
         });
     }
+
 
 }

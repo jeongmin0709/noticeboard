@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{/layout :: setContent(~{this :: content})}">
+  <th:block th:fragment="content">
+    <form th:action="@{/noticeboard/signup}" th:method="post">
+      <div class="m-auto w-25" style="min-width: 380px">
+        <div class="form-group">
+          <h5><strong>본인확인 이메일</strong></h5>
+          <div class="row">
+            <div class="pr-1 col-8"><input type="email" name="email"  placeholder="이메일"></div>
+            <div class="pl-1 col-4"><button class="px-0 but special fit small" id="emailbtn" type="button">인증번호  받기</button></div>
+          </div>
+          <input type="text" maxlength="6" name="authNum" placeholder="인증번호를 입력하세요">
+          <span id="emailMsg"></span>
+        </div>
+        <div class="form-group">
+          <
+          <input>
+        </div>
+      </div>
+    </form>
+  </th:block>
+</th:block>
