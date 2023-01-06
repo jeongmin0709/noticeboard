@@ -1,7 +1,7 @@
 package com.example.noticeboard.config;
 
-import com.example.noticeboard.security.LoginSuccessHandler;
-import com.example.noticeboard.security.MemberDetailsService;
+import com.example.noticeboard.security.handler.LoginSuccessHandler;
+import com.example.noticeboard.security.service.MemberDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +21,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.formLogin().loginPage("/noticeboard/loginForm") // 로그인 페이지 설정
-                .loginProcessingUrl("/noticeboard/login") // 로그인 post 설정
+        http.formLogin().loginPage("/login") // 로그인 페이지 설정
+                .loginProcessingUrl("/login") // 로그인 post 설정
+                .successHandler(new LoginSuccessHandler());
+
+        http.oauth2Login()
                 .successHandler(new LoginSuccessHandler());
 
         http.rememberMe() // rememberMe 기능 작동함
@@ -31,8 +34,8 @@ public class SecurityConfig {
                 .alwaysRemember(false) // 사용자가 체크박스를 활성화하지 않아도 항상 실행, default: false
                 .userDetailsService(userDetailsService);
 
-        http.logout().logoutUrl("/noticeboard/logout")
-            .logoutSuccessUrl("/noticeboard/list");
+        http.logout().logoutUrl("/logout")
+            .logoutSuccessUrl("/list");
 
         http.csrf().disable();
 

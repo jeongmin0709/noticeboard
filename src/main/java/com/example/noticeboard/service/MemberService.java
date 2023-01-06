@@ -12,12 +12,14 @@ import java.util.Collection;
 @Service
 public interface MemberService {
 
-    public void signUp(MemberDTO memberDTO);
+    void signUp(MemberDTO memberDTO);
+    String findUsername(MemberDTO memberDTO);
 
     default Member dtoToEntity(MemberDTO memberDTO , PasswordEncoder passwordEncoder){
         Member member = Member.builder()
                 .username(memberDTO.getUsername())
                 .password(passwordEncoder.encode(memberDTO.getPassword()))
+                .name(memberDTO.getName())
                 .email(memberDTO.getEmail())
                 .fromSocial(false)
                 .build();

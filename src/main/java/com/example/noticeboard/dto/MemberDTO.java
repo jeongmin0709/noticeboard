@@ -22,6 +22,7 @@ public class MemberDTO implements UserDetails, OAuth2User {
 
     private String username;
     private String password;
+    private String name;
     private String email;
     private Set<Role> RoleSet = new HashSet<>();
     private boolean fromSocial;
@@ -34,7 +35,7 @@ public class MemberDTO implements UserDetails, OAuth2User {
     }
 
     @Override
-    public String getName() { return username; }
+    public String getName() { return name; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

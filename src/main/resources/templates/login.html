@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{/layout :: setContent(~{this :: content})}">
+  <th:block th:fragment="content">
+    <div class="mainContainer">
+      <form th:action="@{/login}" method="post">
+        <div class="d-flex justify-content-center">
+          <h1><b>로그인</b></h1>
+        </div>
+
+        <div class="form-floating">
+          <h5><strong>아이디</strong></h5>
+          <input type="text" name="username" placeholder="아이디">
+        </div>
+        <div class="form-floating">
+          <h5 ><strong>비밀번호</strong></h5>
+          <input type="password" name="password" placeholder="비밀번호">
+        </div>
+
+        <div class="mb-2">
+          <input type="checkbox" name="rememberMe" id="copy">
+          <label for="copy">
+            로그인 상태 유지
+          </label>
+        </div>
+        <button class="btn special fit" type="submit">로그인</button>
+        <div class="d-flex justify-content-center find">
+          <ul>
+            <li><a th:href="@{/find/username}">아이디 찾기</a></li>
+            <li><a>비밀번호 찾기</a></li>
+          </ul>
+        </div>
+      </form>
+      <div class="social">
+        <ul class="w-100">
+          <li class="googleLoginBtn">
+            <a th:href="@{/oauth2/authorization/google}"><img th:src="@{/images/google.png}">   구글 계정으로 로그인</a>
+          </li>
+          <li class="naverLoginBtn">
+            <a th:href="@{/oauth2/authorization/naver}"><img th:src="@{/images/naver.png}">네이버 계정으로 로그인</a>
+          </li>
+          <li class="kakaoLoginBtn">
+           <a th:href="@{/oauth2/authorization/kakao}"><img th:src="@{/images/kakao.png}">카카오 계정으로 로그인</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <style>
+      .social img{
+        height: 35px ;
+        padding-right: 10px;
+      }
+      .social ul li{
+        padding-left: 0px;
+      }
+      .social a{
+        display: block;
+        padding: 10px;
+        text-align: center;
+        border-radius: 5px;
+        color: white;
+        font-weight: bold;
+        line-height: 25px;
+        margin-bottom: 10px;
+        text-decoration : none;
+      }
+      .googleLoginBtn{
+        background-color: lightcoral;
+      }
+      .naverLoginBtn{
+        background-color: #00C73C;
+      }
+      .kakaoLoginBtn{
+        background-color: #FDDC3F;
+      }
+      .kakaoLoginBtn a{
+        color: #0b2e13;
+      }
+
+      .form-floating{
+        margin-top: 8px;
+      }
+      .find ul li {
+        display:inline;
+        border-left:1px solid #999;
+        padding:0 10px;
+      }
+      .find ul{
+        padding-left: 0px
+      }
+      .find ul li:first-child{border-left:none;}
+
+      .social ul{
+        list-style:none;
+        padding-left:0px;
+      }
+
+      label{
+        font-size: 1em;
+        font-weight: bold;
+      }
+
+      .mainContainer{
+        height: 100%;
+        padding-top: 40px;
+        padding-bottom: 40px;
+        max-width: 430px;
+        margin: auto;
+      }
+
+      input[name="username"] {
+        margin-bottom: -1px;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      input[name="password"] {
+        margin-bottom: 10px;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+      }
+      </style>
+  </th:block>
+</th:block>

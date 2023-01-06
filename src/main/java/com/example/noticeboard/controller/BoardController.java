@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/noticeboard")
 @RequiredArgsConstructor
 @Log4j2
 public class BoardController {
@@ -39,7 +38,7 @@ public class BoardController {
     public String register(BoardDTO boardDTO){
         log.info("게시글 등록 요청");
         Long boardId = boardService.registerBoard(boardDTO);
-        return"redirect:/noticeboard/list";
+        return"redirect:/list";
     }
 
     @PreAuthorize("permitAll()")
@@ -57,7 +56,7 @@ public class BoardController {
         redirectAttributes.addAttribute("page", pageRequestDTO.getPage());
         redirectAttributes.addAttribute("type", pageRequestDTO.getType());
         redirectAttributes.addAttribute("keyword", pageRequestDTO.getKeyword());
-        return "redirect:/noticeboard/list";
+        return "redirect:/list";
     }
 
     @GetMapping("/modify")
@@ -76,7 +75,7 @@ public class BoardController {
         redirectAttributes.addAttribute("type", pageRequestDTO.getType());
         redirectAttributes.addAttribute("keyword", pageRequestDTO.getKeyword());
         boardService.modifyBoard(boardDTO);
-        return "redirect:/noticeboard/read";
+        return "redirect:/read";
     }
 
     @GetMapping("/recomend/{id}")

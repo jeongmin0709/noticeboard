@@ -1,4 +1,4 @@
-package com.example.noticeboard.security;
+package com.example.noticeboard.security.service;
 
 import com.example.noticeboard.dto.MemberDTO;
 import com.example.noticeboard.entity.member.Member;
@@ -26,7 +26,7 @@ public class MemberDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("Username: "+username);
-        Optional<Member> result = memberRepository.findByUsername(username);
+        Optional<Member> result = memberRepository.findByUsername(username, false);
         if(result.isEmpty()){
             throw new UsernameNotFoundException("chek Email or Social");
         }

@@ -1,4 +1,4 @@
-package com.example.noticeboard.security;
+package com.example.noticeboard.security.handler;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.Authentication;

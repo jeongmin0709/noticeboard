@@ -5,7 +5,7 @@
     <div class="inner">
       <h1>NoticeBoard List</h1>
       <div class="mb-2  d-flex justify-content-end">
-        <a th:href="@{/noticeboard/register(page=${result.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}" class="button special">글쓰기</a>
+        <a th:href="@{/register(page=${result.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}" class="button special">글쓰기</a>
       </div>
 
       <!--list table -->
@@ -22,7 +22,7 @@
         </thead>
         <tbody>
         <th:block th:each="dto : ${result.dtoList}">
-          <tr th:onclick="|location.href='@{/noticeboard/read(id=${dto.id}, page=${result.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}'|">
+          <tr th:onclick="|location.href='@{/read(id=${dto.id}, page=${result.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}'|">
             <td>[[${dto.id}]]</td>
             <td>[[${dto.title}]] ---- [<b th:text="${dto.commentCount}"></b>]</td>
             <td>[[${dto.writer}]]</td>
@@ -38,19 +38,19 @@
       <ul class="pagination h-100 justify-content-center align-items-center" >
         <li class="page-item" th:if="${result.prev}">
           <a class="page-link" style="color: #e5474b"
-             th:href="@{/noticeboard/list(page=${result.start-1}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}" tabindex="-1">Previous</a>
+             th:href="@{/list(page=${result.start-1}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}" tabindex="-1">Previous</a>
         </li>
         <li th:class=" 'page-item' + ${result.page == page? 'active': ''}" th:each="page: ${result.pageList}">
           <a class="page-link" style="color: #e5474b"
-             th:href="@{/noticeboard/list(page=${page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">[[${page}]]</a>
+             th:href="@{/list(page=${page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">[[${page}]]</a>
         </li>
         <li class="page-item" th:if="${result.next}">
           <a class="page-link" style="color: #e5474b"
-             th:href="@{/noticeboard/list(page=${result.end+1}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">Next</a>
+             th:href="@{/list(page=${result.end+1}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">Next</a>
         </li>
       </ul>
 
-      <form action="/noticeboard/list" method="get" id="searchForm">
+      <form action="/list" method="get" id="searchForm">
         <div class="input-group">
           <input type="hidden" name="page" value="1">
           <div class="input-group-prepend">

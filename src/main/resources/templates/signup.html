@@ -2,8 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="~{/layout :: setContent(~{this :: content})}">
     <th:block th:fragment="content">
-            <form th:action="@{/noticeboard/signup}" th:method="post">
-            <div class="m-auto w-25" style="min-width: 380px">
+            <form th:action="@{/signup}" th:method="post">
+            <div class="m-auto" style="max-width: 480px">
                 <div class="d-flex justify-content-center">
                     <h1 class="pb-3 m-auto"><b>회원 가입</b></h1>
                 </div>
@@ -21,6 +21,11 @@
                     <h5><strong>비밀번호 재확인</strong></h5>
                     <input type="password" name="password2"  placeholder="비밀번호 재확인">
                     <span id="password2Msg"></span>
+                </div>
+                <div class="form-group">
+                    <h5><strong>이름</strong></h5>
+                    <input type="text" name="name"  placeholder="이름">
+                    <span id="nameMsg"></span>
                 </div>
                 <div class="form-group">
                     <h5><strong>본인확인 이메일</strong></h5>
@@ -41,10 +46,10 @@
                 let checkPassowrd = false;
                 let checkPassowrd2 = false;
                 let checkEmail = false;
+                let checkName = false;
 
                 $("form").submit(function () {
-                    checkEmail = true;
-                    if(checkUsername && checkPassowrd && checkPassowrd2 && checkEmail){
+                    if(checkUsername && checkPassowrd && checkPassowrd2 && checkEmail && checkName){
                         $("input[name='password2']").attr("disabled","disabled");
                         $("input[name='authNum']").attr("disabled","disabled");
                         return true;
@@ -55,7 +60,7 @@
                 // 이메일 인증번호 이벤트
                 $("#emailbtn").click(function () {
                     $.ajax({
-                        url: '/noticeboard/emailcheck',
+                        url: '/check/email',
                         method: 'post',
                         data: {email:$("input[name='email']").val()},
                         success: function (data){
@@ -94,7 +99,7 @@
                     } else{
                         if(exp.test(usermane)) {
                             $.ajax({
-                                url: '/noticeboard/checkusername',
+                                url: '/check/username',
                                 method: 'post',
                                 data: {username:usermane},
                                 success: function (data){
@@ -128,11 +133,11 @@
                         checkPassowrd = false;
                     }else {
                         if(exp.test(password1)) {
-                            msg.removeAttr("style").css({"color":"blue","font-size":"0.8em"})
+                            msg.css({"color":"blue","font-size":"0.8em"})
                                 .text("유효한 비밀번호입니다.");
                             checkPassowrd = true;
                         } else {
-                            msg.removeAttr("style").css({"color":"red","font-size":"0.8em"})
+                            msg.css({"color":"red","font-size":"0.8em"})
                                 .text("8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.");
                             checkPassowrd = false;
                         }
@@ -152,9 +157,29 @@
                             msg.text("");
                             checkPassowrd2 = true;
                         }else{
-                            msg.removeAttr("style").css({"color":"red","font-size":"0.8em"})
+                            msg.css({"color":"red","font-size":"0.8em"})
                                 .text("비밀번호가 일치하지 않습니다.");
                             checkPassowrd2= false;
+                        }
+                    }
+                });
+                <!-- 이름 유효성 검사 -->
+                $("input[name='name']").blur(function () {
+                    let name = this.value;
+                    let msg = $("#nameMsg");
+                    let exp = RegExp(/^[가-힣]{2,6}$/);
+                    if(name == ""){
+                        msg.css({"color":"red","font-size":"0.8em"})
+                            .text("이름을 입력해 주세요.")
+                        checkName = false;
+                    }else {
+                        if(!exp.test(name)) {
+                            msg.css({"color":"red","font-size":"0.8em"})
+                                .text("이름을 다시 확인해 주세요");
+                            checkName = false;
+                        }else{
+                            msg.text("");
+                            checkName = true;
                         }
                     }
                 });

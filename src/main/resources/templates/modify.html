@@ -4,7 +4,7 @@
   <th:block th:fragment="content">
     <div class="inner" style="max-width: 900px">
       <h1>NoticeBoard Register</h1>
-      <form th:action="@{/noticeboard/modify}" th:method="post">
+      <form th:action="@{/modify}" th:method="post">
         <input type="hidden" name="id" th:value="${BoardDTO.id}">
         <div class="form-group">
           <h5><strong>제목</strong></h5>

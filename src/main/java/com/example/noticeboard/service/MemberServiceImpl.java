@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService{
@@ -20,5 +22,17 @@ public class MemberServiceImpl implements MemberService{
         //DTOtoEntity
         Member member = dtoToEntity(memberDTO, passwordEncoder);
         memberRepository.save(member);
+    }
+
+    @Override
+    public String findUsername(MemberDTO memberDTO) {
+        String name = memberDTO.getName();
+        String email = memberDTO.getEmail();
+        Optional<Member> result = memberRepository.findByNameAndEmail(name, email);
+        if (result.isPresent()){
+            Member member = result.get();
+            return member.getUsername();
+        }
+        return null;
     }
 }

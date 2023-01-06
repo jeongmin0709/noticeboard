@@ -4,7 +4,7 @@
     <th:block th:fragment="content">
         <div class="inner" style="max-width: 900px">
             <div class="row">
-                <div class="col-9"><h1>NoticeBoard Read</h1></div>
+                <div class="col-9"><h1>F Read</h1></div>
                 <div class="col-3 d-flex justify-content-end boardBtnbox">
                     <button type="button" class="btn btn-primary recomendBtn">추천 하기</button>
                     <button type="button" class="btn btn-warning modifyBtn">수정 하기</button>
@@ -135,7 +135,7 @@
                 $(document).on("click", ".recomendBtn", function (){
                     let recomendNum = $(".boardRecomendNum");
                     if(confirm("이 글을 추천하시겠습니까?") == true){
-                        $.getJSON("/noticeboard/recomend/"+boardId, function (result){
+                        $.getJSON("/recomend/"+boardId, function (result){
                             recomendNum.text("추천수: "+result);
                         })
                     }
@@ -149,7 +149,7 @@
                     if(confirm("게시글을 삭제 하시겠습니까?") == true){
                         let form = $('<form></form>');
                         form.attr("method","post");
-                        form.attr("action","/noticeboard/remove");
+                        form.attr("action","/remove");
                         form.appendTo('body');
                         form.append($('<input/>', {type: 'hidden', name: 'id', value: boardId}));
                         form.submit();
@@ -164,7 +164,7 @@
                     let page = [[${pageRequestDTO.page}]];
                     let type = [[${pageRequestDTO.type}]];
                     let keyword = [[${pageRequestDTO.keyword}]];
-                    location.href = "/noticeboard/modify?id="+boardId+"&page="+page+"&type="+type+"&keyword="+keyword;
+                    location.href = "/modify?id="+boardId+"&page="+page+"&type="+type+"&keyword="+keyword;
 
                 });
 
@@ -173,11 +173,11 @@
                     let content = $("textarea[name='register']").val();
                     let writer = [[${#authentication.name}]];
                     if (writer == 'anonymousUser'){
-                        location.href='http://localhost:8080/noticeboard/loginForm';
+                        location.href='/login';
                     }
                     let comment = {boardId: boardId, content: content, writer: writer};
                     $.ajax({
-                        url: "/noticeboard/comment",
+                        url: "/comment",
                         method: "post",
                         data: JSON.stringify(comment),
                         contentType: 'application/json; charset=utf-8',
@@ -197,7 +197,7 @@
                     let id = $(this).parent().data("id");
                     let recomendNum = $(this).parents(".comment").find(".recomendNum");
                     if(confirm("이 댓글을 추천하시겠습니까?") == true){
-                        $.getJSON("/noticeboard/commentRecomend/"+id, function (result){
+                        $.getJSON("/comment/recomend/"+id, function (result){
                             recomendNum.text(result);
                         })
                     }
@@ -211,7 +211,7 @@
                     let id = $(this).parent().data("id");
                     if(confirm("이 댓글을 삭제하시겠습니까?") == true){
                         $.ajax({
-                            url: "/noticeboard/comment/" + id,
+                            url: "/comment/" + id,
                             method: "delete",
                             success: function (reuslt) {
                                 if(reuslt == 'success') {
@@ -261,7 +261,7 @@
                             }
                             console.log(comment);
                             $.ajax({
-                                url: '/noticeboard/comment/' + id,
+                                url: '/comment/' + id,
                                 method: 'put',
                                 data: JSON.stringify(comment),
                                 contentType: 'application/json; charset=utf-8',
@@ -301,7 +301,7 @@
 
                 //댓글 리스트 가져오는 함수
                 function getCommentList(){
-                    $.getJSON("/noticeboard/commentList/" + boardId, function (commentList) {
+                    $.getJSON("/comment/" + boardId, function (commentList) {
                         console.log(commentList)
                         let str = "";
                         $.each(commentList, function (idx, comment){
