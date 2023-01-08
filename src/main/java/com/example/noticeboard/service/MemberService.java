@@ -3,17 +3,17 @@ package com.example.noticeboard.service;
 import com.example.noticeboard.dto.MemberDTO;
 import com.example.noticeboard.entity.member.Member;
 import com.example.noticeboard.entity.member.Role;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
+import java.util.Map;
 
 @Service
 public interface MemberService {
 
-    void signUp(MemberDTO memberDTO);
-    String findUsername(MemberDTO memberDTO);
+    boolean signUp(MemberDTO memberDTO);
+    Map<String, String> findUsername(MemberDTO memberDTO);
+    Map<String, String> findPassword(MemberDTO memberDTO);
 
     default Member dtoToEntity(MemberDTO memberDTO , PasswordEncoder passwordEncoder){
         Member member = Member.builder()

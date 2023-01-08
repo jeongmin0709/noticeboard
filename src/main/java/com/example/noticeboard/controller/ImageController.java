@@ -56,6 +56,7 @@ public class ImageController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping("/removeImg")
     ResponseEntity<Boolean> removeImg(String imgName){

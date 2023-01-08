@@ -6,6 +6,9 @@ import com.example.noticeboard.dto.PageResultDTO;
 import com.example.noticeboard.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,8 +52,9 @@ public class BoardController {
         model.addAttribute("BoardDTO", boardDTO);
     }
 
+    @PreAuthorize("isAuthenticated() and #writer == principal.username")
     @PostMapping("/remove")
-    public String remove(Long id, PageRequestDTO pageRequestDTO, RedirectAttributes redirectAttributes){
+    public String remove(Long id, String writer, PageRequestDTO pageRequestDTO, RedirectAttributes redirectAttributes){
         log.info("게시글 삭제 요청: "+ id);
         boardService.removeBoard(id);
         redirectAttributes.addAttribute("page", pageRequestDTO.getPage());
@@ -59,6 +63,7 @@ public class BoardController {
         return "redirect:/list";
     }
 
+    @PostAuthorize("isAuthenticated() and #model[BoardDTO].writer == principal.username")
     @GetMapping("/modify")
     public void modify(Long id, PageRequestDTO pageRequestDTO ,Model model){
         log.info("게시글 수정 페이지 요청: " + id);
@@ -66,6 +71,7 @@ public class BoardController {
         model.addAttribute("BoardDTO", boardDTO);
     }
 
+    @PreAuthorize("isAuthenticated() and #boardDTO.getWriter() == principal.username")
     @PostMapping("/modify")
     public String modify(BoardDTO boardDTO, PageRequestDTO pageRequestDTO, RedirectAttributes redirectAttributes){
         log.info("게시글 수정 요청: " + boardDTO.getId());
@@ -78,10 +84,11 @@ public class BoardController {
         return "redirect:/read";
     }
 
-    @GetMapping("/recomend/{id}")
+    @PreAuthorize("isAuthenticated() and #writer != principal.username")
+    @PostMapping("/recomend")
     @ResponseBody
-    public int recomend(@PathVariable Long id){
+    public ResponseEntity<Integer> recomend(Long id, String writer){
         log.info("게시글 추천 요청");
-        return boardService.recomendBoard(id);
+        return new ResponseEntity<>(boardService.recomendBoard(id), HttpStatus.OK);
     }
 }

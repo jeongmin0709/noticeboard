@@ -27,9 +27,10 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler{
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
 
+        String uri = "/list";
+        log.info("loginSuccessHandler");
         SavedRequest savedRequest = requestCache.getRequest(request, response);
         String prevPage = (String) request.getSession().getAttribute("prevPage");
-        String uri = "/noticeboard/list";
         if(prevPage != null){
             uri = prevPage;
         }

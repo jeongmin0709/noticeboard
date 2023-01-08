@@ -20,29 +20,30 @@ public class CommentController {
 
     private final CommentService commentService;
 
+    @PreAuthorize("permitAll()")
     @GetMapping(value = "/{boardId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<CommentDTO>> getCommentList(@PathVariable("boardId") Long boardId){
+    public ResponseEntity<List<CommentDTO>> getList(@PathVariable("boardId") Long boardId){
         log.info("댓글 리스트 요청");
         log.info("게시글 번호: "+ boardId);
         List<CommentDTO> commentDTOList = commentService.getCommnetList(boardId);
         return new ResponseEntity<>(commentDTOList, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(value = "/recomend/{commentId}")
-    public ResponseEntity<Integer> commentRecomend(@PathVariable("commentId") Long commentId){
+    @PreAuthorize("isAuthenticated() and #writer != principal.username")
+    @PostMapping(value = "/recomend")
+    public ResponseEntity<Integer> recomend(Long id, String writer){
 
         log.info("댓글 추천 요청");
-        log.info("댓글 번호: "+ commentId);
-        int recommendNum = commentService.recommend(commentId);
-        if(recommendNum != -1){
-            return new ResponseEntity<>(recommendNum, HttpStatus.OK);
+        log.info("댓글 번호: "+ id);
+        int recommendNum = commentService.recommend(id);
+        if(recommendNum == -1){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(-1, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(recommendNum, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PutMapping(value = "/{commentId}")
+    @PreAuthorize("isAuthenticated() and #commentDTO.getWriter() == principal.username")
+    @PutMapping
     public ResponseEntity<String> commentModify(@RequestBody CommentDTO commentDTO){
 
         log.info("댓글 수정 요청");
@@ -51,17 +52,18 @@ public class CommentController {
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @DeleteMapping(value = "/{commentId}")
-    public ResponseEntity<String> commentModify(@PathVariable("commentId")Long commentId){
+    @PreAuthorize("isAuthenticated() and #writer == principal.username")
+    @DeleteMapping
+    public ResponseEntity<String> commentModify(Long id, String writer){
 
         log.info("댓글 삭제 요청");
-        log.info("댓글 번호:" + commentId);
-        commentService.remove(commentId);
+        log.info("댓글 번호:" + id);
+        commentService.remove(id);
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
+
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(value = "")
+    @PostMapping
     public ResponseEntity<Long> commentRegister(@RequestBody CommentDTO commentDTO){
         log.info("댓글 등록 요청");
         log.info("commentDTO" + commentDTO);

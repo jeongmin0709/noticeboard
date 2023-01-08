@@ -32,6 +32,7 @@ public class Oauth2MemberDetailsService extends DefaultOAuth2UserService {
         Member member = null;
 
         if(clientName.equals("Google")){
+            log.info(auth2User.getAttributes());
             String name = auth2User.getAttribute("name");
             String email = auth2User.getAttribute("email");
             member = saveSocialMember(name, email);
