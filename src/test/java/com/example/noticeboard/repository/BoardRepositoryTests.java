@@ -45,12 +45,11 @@ public class BoardRepositoryTests {
     @Test
     public void getBoardList(){
         Pageable pageable = PageRequest.of(0, 10, Sort.by("id").descending());
-        Page<Object[]> result = boardRepository.getBoardPage(null, null, pageable);
+        Page<Object[]> result = boardRepository.getBoardPage(null, null,null , null,pageable);
         result.forEach(row->{
             Object[] arr = (Object[]) row;
             System.out.println(Arrays.toString(arr));
         });
     }
-
 
 }

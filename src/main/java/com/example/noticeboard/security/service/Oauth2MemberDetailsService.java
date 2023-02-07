@@ -1,11 +1,12 @@
 package com.example.noticeboard.security.service;
 
-import com.example.noticeboard.dto.MemberDTO;
 import com.example.noticeboard.entity.member.Member;
 import com.example.noticeboard.entity.member.Role;
 import com.example.noticeboard.repository.MemberRepository;
+import com.example.noticeboard.security.dto.MemberDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-@Log4j2
+@Slf4j
 @RequiredArgsConstructor
 public class Oauth2MemberDetailsService extends DefaultOAuth2UserService {
 
@@ -32,7 +33,6 @@ public class Oauth2MemberDetailsService extends DefaultOAuth2UserService {
         Member member = null;
 
         if(clientName.equals("Google")){
-            log.info(auth2User.getAttributes());
             String name = auth2User.getAttribute("name");
             String email = auth2User.getAttribute("email");
             member = saveSocialMember(name, email);

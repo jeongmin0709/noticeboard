@@ -1,29 +1,36 @@
 package com.example.noticeboard.service;
 
+import com.example.noticeboard.entity.EmailAuthToken;
+import com.example.noticeboard.exception.custom_exception.ExpiredCodeException;
+import com.example.noticeboard.repository.RedisRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
+import java.util.Optional;
 import java.util.Random;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class EmailServiceImpl implements EmailService{
 
     private final JavaMailSender emailSender;
+    private final RedisRepository redisRepository;
 
     @Value("${AdminMail.id}")
     private String sender;
 
-    private int code;
 
-    private MimeMessage createMessage(String receiver)throws Exception{
-        MimeMessage  message = emailSender.createMimeMessage();
+    private MimeMessage createMessage(String receiver, int code) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = emailSender.createMimeMessage();
 
         message.addRecipients(Message.RecipientType.TO, receiver);//보내는 대상
         message.setSubject("Notice Board Service 이메일 인증");//제목
@@ -48,25 +55,31 @@ public class EmailServiceImpl implements EmailService{
         return message;
     }
     
-    private void createCode(){
+    private int createCode(){
         Random generator = new Random();
         generator.setSeed(System.currentTimeMillis());
-        code = generator.nextInt(10000000) % 1000000;
+        return generator.nextInt(10000000) % 1000000;
     }
 
     @Override
-    public int sendMail(String receiver) throws Exception {
+    public void sendMail(String receiver) throws MessagingException, UnsupportedEncodingException {
+        int code = createCode();
+        MimeMessage message = createMessage(receiver, code);
+        emailSender.send(message);
+        EmailAuthToken emailAuthToken = EmailAuthToken.builder()
+                .email(receiver)
+                .code(Integer.toString(code))
+                .expiration(60*30L)
+                .build();
+        redisRepository.save(emailAuthToken);
+    }
 
-        createCode();
-        MimeMessage message = createMessage(receiver);
-
-        try {
-            emailSender.send(message);
-
-        }catch (MailException e){
-            e.printStackTrace();
-            throw new IllegalArgumentException();
-        }
-        return code;
+    @Override
+    public String getAuthCode(String receiver) {
+        Optional<EmailAuthToken> result = redisRepository.findById(receiver);
+        if(result.isEmpty()) throw new ExpiredCodeException();
+        EmailAuthToken emailAuthToken = result.get();
+        log.info("result code: {}", emailAuthToken.getCode());
+        return emailAuthToken.getCode();
     }
 }

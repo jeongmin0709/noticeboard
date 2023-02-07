@@ -1,6 +1,7 @@
 package com.example.noticeboard.config;
 
-import com.example.noticeboard.security.entrypoint.AjaxAuthenticationEntryPoint;
+import com.example.noticeboard.security.handler.CustomAccessDeniedHandler;
+import com.example.noticeboard.security.handler.CustomAuthenticationEntryPoint;
 import com.example.noticeboard.security.handler.LoginFailureHandler;
 import com.example.noticeboard.security.handler.LoginSuccessHandler;
 import com.example.noticeboard.security.service.MemberDetailsService;
@@ -39,7 +40,14 @@ public class SecurityConfig {
                 .successHandler(loginSuccessHandler())
                 .and()
                 .exceptionHandling()
-                .authenticationEntryPoint(authenticationEntryPoint());
+                .authenticationEntryPoint(authenticationEntryPoint())
+                .accessDeniedHandler(accessDeniedHandler())
+                .and()
+                .rememberMe() // rememberMe 기능 작동함
+                .rememberMeParameter("rememberMe") // default: remember-me, checkbox 등의 이름과 맞춰야함
+                .tokenValiditySeconds(3600) // 쿠키의 만료시간 설정(초), default: 14일
+                .alwaysRemember(false) // 사용자가 체크박스를 활성화하지 않아도 항상 실행, default: false
+                .userDetailsService(userDetailsService); // 기능을 사용할 때 사용자 정보가 필요함. 반드시 이 설정 필요함.
 
 
         return http.build();
@@ -55,6 +63,10 @@ public class SecurityConfig {
     LoginFailureHandler loginFailureHandler(){return new LoginFailureHandler();}
 
     @Bean
-    AjaxAuthenticationEntryPoint authenticationEntryPoint(){return new AjaxAuthenticationEntryPoint("/login");}
+    CustomAuthenticationEntryPoint authenticationEntryPoint(){return new CustomAuthenticationEntryPoint("/login");}
+
+    @Bean
+    CustomAccessDeniedHandler accessDeniedHandler(){return new CustomAccessDeniedHandler("error/403");}
+
 
 }

@@ -1,58 +1,28 @@
 package com.example.noticeboard.service;
 
 
-import com.example.noticeboard.dto.BoardDTO;
-import com.example.noticeboard.dto.ImageDTO;
-import com.example.noticeboard.dto.PageRequestDTO;
-import com.example.noticeboard.dto.PageResultDTO;
+import com.example.noticeboard.dto.*;
 import com.example.noticeboard.entity.Board;
 import com.example.noticeboard.entity.Image;
 import com.example.noticeboard.entity.member.Member;
+import com.example.noticeboard.security.dto.MemberDTO;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.io.IOException;
+
 
 public interface BoardService {
 
-    PageResultDTO<BoardDTO, Object[]> getList(PageRequestDTO pageRequestDTO);
+    PageResultDTO<BoardDTO, Object[]> getList(PageRequestDTO pageRequestDTO, MemberDTO memberDTO);
 
     Long registerBoard(BoardDTO boardDTO);
 
-    BoardDTO getBoard(Long id, String pageType);
+    BoardDTO getBoard(Long id);
 
-    int recomendBoard(Long id);
+    Integer recommendBoard(Long id);
 
-    void removeBoard(Long id);
+    Long removeBoard(Long id) throws IOException;
 
-    void modifyBoard(BoardDTO boardDTO);
-
-    default public BoardDTO entityToDto(Board board, List<Image> imageList){
-
-        BoardDTO boardDTO = BoardDTO.builder()
-                .id(board.getId())
-                .title(board.getTitle())
-                .content(board.getContent())
-                .writer(board.getMember().getUsername())
-                .recomendNum(board.getRecomendNum())
-                .viewNum(board.getViewNum())
-                .createDate(board.getCrateDate())
-                .modDate(board.getModDate())
-                .build();
-
-        List<ImageDTO> imageDTOList = imageList.stream().map(image -> {
-            return ImageDTO.builder()
-                    .boardId(board.getId())
-                    .fileName(image.getName())
-                    .folderPath(image.getPath())
-                    .uuid(image.getUuid())
-                    .build();
-        }).collect(Collectors.toList());
-
-        boardDTO.setImageDTOList(imageDTOList);
-        return boardDTO;
-    }
+    Long modifyBoard(BoardDTO boardDTO);
 
     default public BoardDTO entityToDto(Board board, Long commentCount){
 
@@ -64,16 +34,25 @@ public interface BoardService {
                 .recomendNum(board.getRecomendNum())
                 .viewNum(board.getViewNum())
                 .commentCount(commentCount.intValue())
-                .createDate(board.getCrateDate())
+                .createDate(board.getCreateDate())
                 .modDate(board.getModDate())
                 .build();
 
+        board.getImageList().forEach(image -> {
+                    ImageDTO imageDTO = ImageDTO.builder()
+                            .boardId(board.getId())
+                            .uuid(image.getUuid())
+                            .folderPath(image.getPath())
+                            .fileName(image.getName())
+                            .build();
+                    boardDTO.getImageDTOList().add(imageDTO);
+                }
+        );
         return boardDTO;
     }
 
-    default public Map<String, Object> dtoToEntity(BoardDTO boardDTO){
 
-        Map<String, Object> entityMap = new HashMap<>();
+    default Board dtoToEntity(BoardDTO boardDTO){
 
         Member member = Member.builder().username(boardDTO.getWriter()).build();
         Board board = Board.builder()
@@ -84,18 +63,17 @@ public interface BoardService {
                 .title(boardDTO.getTitle())
                 .content(boardDTO.getContent())
                 .build();
-        entityMap.put("board", board);
 
-        List<Image> imageList = boardDTO.getImageDTOList().stream().map(imageDTO -> {
-            return Image.builder()
-                    .board(board)
-                    .path(imageDTO.getFolderPath())
-                    .name(imageDTO.getFileName())
-                    .uuid(imageDTO.getUuid())
-                    .build();
-        }).collect(Collectors.toList());
-        entityMap.put("imageList", imageList);
+        boardDTO.getImageDTOList().stream().forEach(imageDTO -> {
+            board.addImage(
+              Image.builder()
+                      .name(imageDTO.getFileName())
+                      .path(imageDTO.getFolderPath())
+                      .uuid(imageDTO.getUuid())
+                      .build());
+        });
 
-        return entityMap;
+
+        return board;
     }
 }

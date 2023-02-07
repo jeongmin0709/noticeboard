@@ -1,184 +1,201 @@
 <!DOCTYPE html>
-<html lang="en">
-<th:block th:replace="~{/layout :: setContent(~{this :: content})}">
-    <th:block th:fragment="content">
-        <div class="inner" style="max-width: 900px">
-            <h1>NoticeBoard Register</h1>
-            <form th:action="@{/register}" th:method="post">
-                <input type="hidden" name="writer" th:value="${#authentication.name}">
-                <div class="form-group">
-                    <h5><strong>제목</strong></h5>
-                    <input type="text" name="title" placeholder="제목">
-                </div>
-                <div class="form-group">
-                    <label>내용</label>
-                    <textarea name="content" placeholder="내용을 입력해 주세요." rows="10"></textarea>
-                </div>
-
-                <div class="uploadResult">
-                    <ul>
-                    </ul>
-                </div>
-
-                <div class="form-group fileForm">
-                    <label>이미지</label>
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input files" id="fileInput" multiple>
-                        <label class="custom-file-label" data-browse="Browse"></label>
-                        <span id="imgMsg"></span>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{/layout :: setContent(~{this :: title}, ~{this :: link}, ~{this :: content})}">
+<header>
+    <title th:text="#{title.register}">Notice Board Register</title>
+    <th:block th:fragment="link">
+        <!-- include summernote css -->
+        <link th:href="@{https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css}" rel="stylesheet">
+        <!-- include summernote js -->
+        <script th:src="@{https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js}"></script>
+        <script th:src="@{https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/lang/summernote-ko-KR.min.js}"></script>
+    </th:block>
+</header>
+<body>
+<th:block th:fragment="content">
+    <!--content-->
+    <section class="py-5" id="scroll-target">
+        <div class="container px-lg-5">
+            <div class="mx-auto" style="max-width: 893px">
+                <div class="row border-bottom border-secondary mb-4 mx-1 border-4">
+                    <div class="col-md px-0 py-md-3 d-flex justify-content-center justify-content-md-start"><h1 th:text="#{title.register}">게시글 등록</h1></div>
+                    <div class="col-md d-flex justify-content-end px-0 py-3">
+                        <a class="btn btn-primary" th:href="@{/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword},
+                           order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}"><i class="bi bi-list"></i> 목록가기</a>
                     </div>
                 </div>
-                <div class="box" style="border: none; margin: 0px; padding: 0px">
-                </div>
-                <button type="submit" class="btn special" id="submitBtn">작성 완료</button>
-            </form>
+                <form id="registerForm" th:action="@{/register}" th:method="post" th:object="${boardDTO}">
+                    <input type="hidden" name="writer" th:value="${#authentication.name}">
+                    <th:block th:object="${pageRequestDTO}">
+                        <input type="hidden" th:field="*{page}">
+                        <input type="hidden" th:field="*{type}">
+                        <input type="hidden" th:field="*{keyword}">
+                        <input type="hidden" th:field="*{order}">
+                        <input type="hidden" th:field="*{my}">
+                    </th:block>
+                    <div class="form-group mb-3">
+                        <input class="form-control-lg w-100" type="text" th:field="*{title}" placeholder="제목" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea class="form-control" th:field="*{content}" id="summernote"></textarea>
+                    </div>
+                    <div class="mt-4 p-3 bg-light">
+                        <ul class="fs-6">
+                            <li><strong class="text-danger">섬네일을 클릭하시면 본문에 첨부됩니다.</strong></li>
+                            <li>이미지는 최대 크기는 10MB 입니다.</li>
+                            <li>이미지는 6개까지 업로드가 가능합니다.</li>
+                        </ul>
+                        <div class="row thumbnailList">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputFile" class="form-label">이미지</label>
+                        <input type="file" class="form-control" id="inputFile" multiple>
+                    </div>
+                    <div class="d-flex justify-content-center mt-5">
+                        <button type="submit" class="btn btn-primary me-3 rounded" id="submitBtn">작성 완료</button>
+                        <a class="btn btn-secondary rounded" th:href="@{/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword},
+                                order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}">취소</a>
+                    </div>
+                    <div class="box">
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <style>
-            .uploadResult {
-                width: 100%;
-                background-color: #f8d1d2;
-                margin-top: 5px;
-            }
-
-            .uploadResult ul {
-                vertical-align: top;
-                display: flex;
-                padding: 0 22px;
-            }
-
-            .uploadResult ul li {
-                list-style: none;
-                width: 140px;
-                height: 150px;
-                position: relative;
-                margin: 15px;
-                display: flex;
-                padding: 0px;
-            }
-
-            .uploadResult ul li img {
-                position: absolute;
-                width: 160px;
-                clip: rect(0, 140px, 150px, 0);
-                z-index: 0;
-            }
-
-            .uploadResult ul li button {
-                width: 20px;
-                height: 20px;
-                font-size: 10px;
-                position: absolute;
-                right: 0px;
-                z-index: 1;
-            }
-        </style>
-
-        <script th:inline="javascript">
-            $(document).ready(function () {
-
-                function ckeckExtension(fileName, fileSize) {
-                    let regex = new RegExp("\\.(bmp|gif|jpg|jpeg|png)$");
-                    let maxSize = 10485760;
-                    if (fileSize >= maxSize) {
-                        $("#imgMsg").css({"color": "red", "font-size": "0.6em"})
-                            .text("파일 사이즈 초과");
-                        return false;
-                    }
-                    if (!regex.test(fileName)) {
-                        $("#imgMsg").css({"color": "red", "font-size": "0.6em"})
-                            .text("해당 종류의 파일은 업로드할 수 없습니다.");
-                        return false;
-                    }
-                    return true;
-                }
-
-                function showResult(ImageDTOList) {
-                    let uploadUL = $(".uploadResult ul");
-                    let str = "";
-                    $(ImageDTOList).each(function (i, ImageDTO) {
-                        str += "<li data-name='" + ImageDTO.fileName + "' data-path='" + ImageDTO.folderPath + "' data-uuid='" + ImageDTO.uuid + "'>";
-                        str += "<button type='button' data-file=\'" + ImageDTO.imageURL + "\' "
-                        str += "class='btn-warning btn-sm'>X</button>";
-                        str += "<img src='/display?fileName=" + ImageDTO.thumbnailURL + "'>";
-                        str + "</li>";
-                    });
-                    uploadUL.append(str);
-                }
-
-                $(".custom-file-input").change(function () {
-                    let fileName = $(this).val().split("\\").pop();
-                    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-                    let formData = new FormData();
-                    let inputFile = $(this);
-                    let files = inputFile[0].files;
-                    let appended = false;
-                    let leftNum = 5 - $(".uploadResult ul").children().length;
-                    if (leftNum < 1) {
-                        alert("이미지는 최대 5개까지 업로드할 수 있습니다.");
-                        return false;
-                    }
-                    if (files.length > leftNum) {
-                        alert("이미지는 최대 5개까지 업로드할 수 있습니다.");
-                    }
-                    let length = files.length < leftNum ? files.length : leftNum;
-                    for (let i = 0; i < length; i++) {
-                        if (!ckeckExtension(files[i].name, files[i].size)) {
-                            return false;
-                        }
-                        console.log(files[i]);
-                        formData.append("uploadImgs", files[i]);
-                        appended = true;
-                    }
-                    if (!appended) {
-                        return;
-                    }
-                    $.ajax({
-                        url: '/upload',
-                        processData: false,
-                        contentType: false,
-                        data: formData,
-                        type: 'POST',
-                        dataType: 'json',
-                        success: function (ImageDTOList) {
-                            console.log(ImageDTOList);
-                            showResult(ImageDTOList);
-                        },
-                        error: function (jqXHR, textStatus, errorThrown) {
-                            console.log(textStatus);
-                        }
-                    });
-                });
-
-                $(".uploadResult").on("click", "li button", function (e) {
-                    let targetImg = $(this).data("file");
-                    let targetLI = $(this).closest("li");
-                    $.ajax({
-                        url: '/removeImg',
-                        data: {imgName: targetImg},
-                        dataType: 'text',
-                        type: 'delete',
-                        success: function (result) {
-                            targetLI.remove();
-                        }
-                    });
-
-                });
-                $("#submitBtn").on("click", function (e) {
-                    e.preventDefault();
-                    var str = "";
-                    $(".uploadResult li").each(function (i, ImageDTO) {
-                        let target = $(ImageDTO);
-                        str += "<input type='hidden' name='imageDTOList[" + i + "].fileName' value='" + target.data('name') + "'>";
-                        str += "<input type='hidden' name='imageDTOList[" + i + "].folderPath' value='" + target.data('path') + "'>";
-                        str += "<input type='hidden' name='imageDTOList[" + i + "].uuid' value='" + target.data('uuid') + "'>";
-                    });
-                    // 태그들이 추가된 것을 확인한 후에 comment를 제거
-                    $(".box").html(str);
-                    $("form").submit();
-                })
+    </section>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            $('#summernote').summernote({
+                placeholder: '내용을 입력해 주세요.',
+                tabsize: 2,
+                height: 500,
+                lang: 'ko-KR',
+                focus: true,
+                disableDragAndDrop: true,
+                toolbar: [
+                    // 글꼴 설정
+                    ['fontname', ['fontname']],
+                    // 글자 크기 설정
+                    ['fontsize', ['fontsize']],
+                    // 굵기, 기울임꼴, 밑줄,취소 선, 서식지우기
+                    ['style', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+                    // 글자색
+                    ['color', ['forecolor', 'color']],
+                    // 표만들기
+                    ['table', ['table']],
+                    // 글머리 기호, 번호매기기, 문단정렬
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    // 그림첨부, 링크만들기
+                    ['insert', ['link']],
+                    // 코드보기, 확대해서보기, 도움말
+                    ['view', ['codeview', 'fullscreen', 'help']]
+                ],
+                // 추가한 글꼴
+                fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', '맑은 고딕', '궁서', '굴림체', '굴림', '돋음체', '바탕체'],
+                // 추가한 폰트사이즈
+                fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '20', '22', '24', '28', '30', '36', '50', '72'],
             });
-        </script>
 
-    </th:block>
+            // 이미지 유효성 검사
+            function ckeckExtension(fileName, fileSize) {
+                let regExp = new RegExp("\\.(bmp|gif|jpg|jpeg|png)$");
+                let maxSize = 10485760;
+                if (fileSize >= maxSize) {
+                    alert(fileName + "파일크기 초과!");
+                    return false;
+                }
+                if (!regExp.test(fileName)) {
+                    alert(fileName + "는 이미지 파일이 아닙니다.");
+                    return false;
+                }
+                return true;
+            }
+
+            // 썸내일 출력
+            function showThumbnailList(ImageDTOList) {
+                let thumbnailList = $(".thumbnailList");
+                let str = "";
+                $(ImageDTOList).each(function (i, ImageDTO) {
+                    str += "<div class='col-6 col-sm-4 col-md-3 col-lg-2' data-name='" + ImageDTO.fileName + "' data-path='" + ImageDTO.folderPath + "' data-uuid='" + ImageDTO.uuid + "'>";
+                    str += "    <button data-image_url='" + ImageDTO.imageURL + "' class='btn btn-secondary small imgRemoveBtn' type='button'><i class='bi bi-x-lg w-100 h-100'></i></button>"
+                    str += "    <img data-image_url='" + ImageDTO.imageURL + "' class='img-thumbnail' src='/image?fileName=" + ImageDTO.thumbnailURL + "'>";
+                    str += "</div>";
+                });
+                thumbnailList.append(str);
+            }
+
+            //이미지 업로드
+            $("#inputFile").change(function () {
+                let formData = new FormData();
+                let inputFile = $(this);
+                let files = inputFile[0].files;
+                let appended = false;
+                let limitNum = 6;
+                let leftNum = limitNum - $(".thumbnailList").children().length;
+                if (leftNum < 1 || files.length > leftNum){
+                    alert("최대 6개까지 업로드할 수 있습니다.")
+                    return false;
+                }
+                for (let i = 0; i < files.length; i++) {
+                    if (!ckeckExtension(files[i].name, files[i].size)) return false;
+                    console.log(files[i]);
+                    formData.append("images", files[i]);
+                    appended = true;
+                }
+                if (!appended) return;
+                $.ajax({
+                    url: '/image',
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    type: 'post',
+                    dataType: 'json',
+                    success: function (ImageDTOList) {
+                        console.log(ImageDTOList);
+                        showThumbnailList(ImageDTOList);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(textStatus);
+                    }
+                });
+            });
+
+            // 원본이미지 삽입
+            $(".thumbnailList").on("click", "img", function () {
+                let imageURL = $(this).data("image_url");
+                $('#summernote').summernote('insertImage', '/image?fileName=' + imageURL, function ($image) {
+                    $image.addClass('img-fluid');
+                });
+            });
+
+            //이미지 삭제
+            $(".thumbnailList").on("click", "button", function () {
+                let li = $(this).parent();
+                let fileName = $(this).data("image_url");
+                $.ajax({
+                    url: '/image?fileName='+ fileName,
+                    data: {fileName: fileName},
+                    type: 'delete',
+                    success: function () {
+                        li.remove();
+                        $("img[src='/image?fileName=" + fileName + "']").remove();
+                    }
+                });
+            });
+
+            $('#registerForm').submit(function () {
+                var str = "";
+                $(".thumbnailList div").each(function (i, ImageDTO) {
+                    let target = $(ImageDTO);
+                    str += "<input type='hidden' name='imageDTOList[" + i + "].fileName' value='" + target.data('name') + "'>";
+                    str += "<input type='hidden' name='imageDTOList[" + i + "].folderPath' value='" + target.data('path') + "'>";
+                    str += "<input type='hidden' name='imageDTOList[" + i + "].uuid' value='" + target.data('uuid') + "'>";
+                });
+                $(".box").html(str);
+                return true;
+            });
+        });
+    </script>
 </th:block>
+</body>
+</html>

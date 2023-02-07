@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,12 +28,12 @@ public class ImageServiceImpl implements ImageService {
     private String uploadPath;
 
     @Override
-    public List<ImageDTO> uploadImg(MultipartFile[] uploadImgs) {
+    public List<ImageDTO> uploadImg(MultipartFile[] images) throws IOException {
         List<ImageDTO> imageDTOList = new ArrayList<>();
-        for (MultipartFile uploadImg : uploadImgs) {
+        for (MultipartFile uploadImg : images) {
             // 이미지파일이아니면 리턴
             if(!uploadImg.getContentType().startsWith("image")){
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("이미지 파일이 아닙니다.");
             }
             String originalName = uploadImg.getOriginalFilename();
             String fileName = originalName.substring(originalName.lastIndexOf("\\")+1);
@@ -40,43 +41,35 @@ public class ImageServiceImpl implements ImageService {
             String uuid = UUID.randomUUID().toString();
             String saveName = uploadPath + File.separator + folderPath + File.separator + uuid + "_" + fileName;
             Path savePath = Paths.get(saveName);
-            log.info("fileNmae: " + fileName);
-            try {
+            log.info("파일 이름: " + fileName);
                 //원본파일 저장
-                uploadImg.transferTo(savePath);
-                //섬네일 생성
-                String thumbnailSaveName = uploadPath + File.separator + folderPath + File.separator + "s_" + uuid + "_" + fileName;
-                File thumbnailFile = new File(thumbnailSaveName);
+            uploadImg.transferTo(savePath);
+            //섬네일 생성
+            String thumbnailSaveName = uploadPath + File.separator + folderPath + File.separator + "s_" + uuid + "_" + fileName;
+            File thumbnailFile = new File(thumbnailSaveName);
 
-                Thumbnailator.createThumbnail(savePath.toFile(), thumbnailFile, 300, 300);
-                imageDTOList.add(ImageDTO.builder().fileName(fileName).uuid(uuid).folderPath(folderPath).build());
+            Thumbnailator.createThumbnail(savePath.toFile(), thumbnailFile, 200, 200);
+            imageDTOList.add(ImageDTO.builder().fileName(fileName).uuid(uuid).folderPath(folderPath).build());
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
         return imageDTOList;
     }
 
     @Override
-    public File getImage(String fileName, String size) throws IOException {
-        ResponseEntity<byte[]> result = null;
+    public File getImage(String fileName) throws UnsupportedEncodingException {
         String srcFileName = URLDecoder.decode(fileName, "UTF-8");
         File file = new File(uploadPath+File.separator+srcFileName);
-
-        if(size != null && size.equals("1")) {
-            file = new File(file.getParent(), file.getName().substring(2));
-        }
         return file;
     }
 
     @Override
-    public boolean removeImg(String ImgName) throws IOException {
+    public boolean removeImg(String ImgName) throws UnsupportedEncodingException {
         String srcImgName = URLDecoder.decode(ImgName, "UTF-8");
         File image = new File(uploadPath+File.separator+srcImgName);
         File thumbnail = new File(image.getParent(), "s_" +image.getName());
         return image.delete() && thumbnail.delete();
     }
+
 
     private String makeFolder(){
         String str = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));

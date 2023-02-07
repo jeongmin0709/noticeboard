@@ -16,10 +16,8 @@ import java.util.stream.Collectors;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @ToString
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseEntity {
 
     @Id
@@ -29,18 +27,28 @@ public class Member extends BaseEntity {
 
     private String name;
 
+    @Column(unique = true)
     private String email;
 
     @ElementCollection(fetch = FetchType.LAZY)
-    @Builder.Default
     @ToString.Exclude
     @Enumerated(EnumType.STRING)
     private Set<Role> roleSet = new HashSet<>();
 
     private boolean fromSocial;
 
+    @Builder
+    public Member(String username, String password, String name, String email, boolean fromSocial) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.email = email;
+        this.fromSocial = fromSocial;
+    }
 
-    public void changePassword(String password){this.password = password;}
+
+    public void setPassword(String password){this.password = password;}
+    public void setEmail(String email){this.email = email;}
     public void addRole(Role role){roleSet.add(role);}
     public void removeRole(Role role){roleSet.remove(role);}
 

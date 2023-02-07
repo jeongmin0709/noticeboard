@@ -1,113 +1,178 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<th:block th:replace="~{/layout :: setContent(~{this :: content})}">
-    <th:block th:fragment="content">
-        <div class="form" style="max-width: 480px">
-            <div class="d-flex justify-content-center">
-                <h1 class="pb-3 m-auto"><b>아이디 찾기</b></h1>
-            </div>
-            <div class="form-group">
-                <h5><strong>이름</strong></h5>
-                <input type="text" name="name" placeholder="이름">
-                <span id="nameMsg"></span>
-            </div>
-            <div class="form-group">
-                <h5><strong>본인확인 이메일</strong></h5>
-                <div class="row">
-                    <div class="pr-1 col-8"><input type="email" name="email" placeholder="이메일"></div>
-                    <div class="pl-1 col-4">
-                        <button class="px-0 but special fit small" id="emailbtn" type="button">인증번호 받기</button>
-                    </div>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{/layout :: setContent(~{this :: title}, ~{this :: link}, ~{this :: content})}">
+<header>
+    <title th:text="#{title.findUsername}">Notice Board FindUsername</title>
+    <th:block th:fragment="link"></th:block>
+</header>
+<body>
+<th:block th:fragment="content">
+    <div class="container px-lg-5">
+        <div class="m-auto singup" style="max-width: 500px">
+            <div class="row border-bottom border-secondary mb-4 mx-1 border-4">
+                <div class="px-0 py-2 py-md-3 d-flex justify-content-center justify-content-md-start"><h1 th:text="#{title.findUsername}">아이디 찾기</h1>
                 </div>
-                <input type="text" maxlength="6" name="authNum" placeholder="인증번호를 입력하세요">
-                <span id="emailMsg">본인확인 이메일 주소와 입력한 이메일 주소가 같아야, 인증번호를 받을 수 있습니다.</span>
             </div>
-            <button type="button" class="btn special fit submitBtn">아이디 찾기</button>
-            <div class="d-flex justify-content-center idBox">
-            </div>
+            <form th:method="post" th:action="@{/find/username}" th:object="${memberDTO}">
+                <div class="form-floating mb-3">
+                    <input class="form-control" id="name" th:field="*{name}" type="text" placeholder="이름"/>
+                    <label for="name">이름</label>
+                    <div class="invalid-feedback" style="font-size: 0.7em"></div>
+                </div>
+                <div class="input-group">
+                    <div class="form-floating w-75">
+                        <input class="form-control" id="email" th:field="*{email}" type="email" placeholder="이메일"/>
+                        <label for="email">본인확인 이메일</label>
+                        <div class="valid-feedback" style="font-size: 0.7em"></div>
+                        <div class="invalid-feedback" style="font-size: 0.7em"></div>
+                    </div>
+                    <button class="btn btn-primary small w-25 px-2 py-1 mt-3" style="height: 56px" id="sendCodeBtn" type="button">
+                        인증번호 받기
+                    </button>
+                </div>
+                <div class="form-floating mb-5">
+                    <input class="form-control" id="code" maxlength="6" th:field="*{code}" type="number" placeholder="인증번호"/>
+                    <label for="code">인증번호</label>
+                    <div class="valid-feedback" style="font-size: 0.7em"></div>
+                    <div class="invalid-feedback" style="font-size: 0.7em"></div>
+                </div>
+                <div class="d-grid mb-3">
+                    <button class="btn btn-primary fs-5" id="findUsernameBtn" type="button">아이디 찾기</button>
+                </div>
+            </form>
         </div>
-        <style>
-            .form {
-                margin: 150px auto;
-            }
-        </style>
-        <script th:inline="javascript">
-            $(document).ready(function () {
-                let checkName = false;
-                let checkEmail = false;
-                let username = null;
+    </div>
+    <script th:inline="javascript">
+        $(document).ready(function () {
 
-                $(".submitBtn").click(function () {
-                    if (checkName && checkEmail) {
-                        if (username == null) {
-                            $(".idBox").css("margin-top", "30px").css("border", "1px solid red");
-                            $(".idBox").html("<h5 style='text-transform: none; margin: 50px auto'><strong>비밀번호를 찾을 수 없습니다.</strong></h5>");
-                        } else {
-                            $(".idBox").css("margin-top", "30px").css("border", "1px solid red");
-                            $(".idBox").html("<h3 style='text-transform: none; margin: 50px auto'><strong>임시 비밀번호: " + password + "</strong></h3>");
+
+            <!--이름 유효성 검사-->
+            let nameEelement = $('#name');
+            nameEelement.focusout(function () {
+                let name = nameEelement.val();
+                let invalidFeedback = nameEelement.siblings(".invalid-feedback");
+                let regExp = RegExp(/^[가-힣]{2,6}$/);
+                if (name == "") {
+                    invalidFeedback.text("이름을 입력해 주세요.");
+                    nameEelement.removeClass("is-valid");
+                    nameEelement.addClass("is-invalid");
+                } else {
+                    if (regExp.test(name)) {
+                        nameEelement.removeClass("is-invalid");
+                        nameEelement.addClass("is-valid");
+                    } else {
+                        invalidFeedback.text("이름을 다시 확인해 주세요");
+                        nameEelement.removeClass("is-valid");
+                        nameEelement.addClass("is-invalid");
+                    }
+                }
+            });
+
+            <!--이메일 유효성 검사-->
+            let emailEelement = $('#email');
+            emailEelement.focusout(function () {
+                let email = emailEelement.val();
+                let invalidFeedback = emailEelement.siblings(".invalid-feedback");
+                let regExp = RegExp(/^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i);
+                if (email == "") {
+                    invalidFeedback.text("이메일을 입력해 주세요.");
+                    emailEelement.removeClass("is-valid");
+                    emailEelement.addClass("is-invalid");
+                } else {
+                    if (!regExp.test(email)) {
+                        invalidFeedback.text("이메일을 다시 확인해 주세요");
+                        emailEelement.removeClass("is-valid");
+                        emailEelement.addClass("is-invalid");
+                    } else {
+                        $('#sendCodeBtn').removeAttr("disabled")
+                        emailEelement.removeClass("is-invalid");
+                        emailEelement.addClass("is-valid");
+                    }
+                }
+            });
+
+            <!-- 이메일 인증번호 발송 -->
+            $('#sendCodeBtn').click(function () {
+                if (emailEelement.hasClass("is-valid")) {
+                    let email = emailEelement.val();
+                    let name = nameEelement.val();
+                    let invalidFeedback = emailEelement.siblings(".invalid-feedback");
+                    let validFeedback = emailEelement.siblings(".valid-feedback");
+                    if (emailEelement.hasClass("is-valid")) {
+                        $.ajax({
+                            url: '/username/email',
+                            method: 'POST',
+                            data: {email: email, name: name},
+                            success: function (result) {
+                                validFeedback.text(result)
+                            }, error: function (jqXHR) {
+                                invalidFeedback.text(jqXHR.responseText);
+                                emailEelement.removeClass("is-valid");
+                                emailEelement.addClass("is-invalid");
+                            }
+                        });
+                    }
+                }
+            });
+
+            <!-- 인증번호 유효성 검사 -->
+            let codeEelement = $('#code');
+            codeEelement.focusout(function () {
+                let code = codeEelement.val();
+                let email = emailEelement.val();
+                let validFeedback = codeEelement.siblings(".valid-feedback");
+                let invalidFeedback = codeEelement.siblings(".invalid-feedback");
+                if (code == "") {
+                    invalidFeedback.text("인증번호를 입력해 주세요.");
+                    codeEelement.removeClass("is-valid");
+                    codeEelement.addClass("is-invalid");
+                } else {
+                    $.ajax({
+                        url: "/check/code",
+                        method: 'get',
+                        data: {email: email, code: code},
+                        success: function (result) {
+                            if (result.first) {
+                                validFeedback.text(result.second);
+                                codeEelement.removeClass("is-invalid");
+                                codeEelement.addClass("is-valid");
+                            } else {
+                                validFeedback.text(result.second);
+                                codeEelement.removeClass("is-valid");
+                                codeEelement.addClass("is-invalid");
+                            }
                         }
-                    }
-                });
+                    })
+                }
+            });
 
-                $("#emailbtn").click(function () {
-                    let data = {
-                        name: $("input[name='name']").val(),
-                        email: $("input[name='email']").val()
-                    }
+            <!--아이디 찾기-->
+            $("#findUsernameBtn").click(function () {
+                let isNameValid = nameEelement.hasClass("is-valid");
+                let isEmailValid = emailEelement.hasClass("is-valid");
+                let isCodeValid = codeEelement.hasClass("is-valid");
+                if (isNameValid && isEmailValid && isCodeValid) {
+                    let data = {name: nameEelement.val(), email: emailEelement.val(), code: codeEelement.val()};
+                    let modal = $("#usernameModal");
                     $.ajax({
                         url: '/find/username',
                         method: 'post',
-                        dataType: "json",
-                        contentType: "application/json",
-                        data: JSON.stringify(data),
+                        data: data,
                         success: function (result) {
                             console.log(result);
-                            let code = result.code;
-                            username = result.username;
-                            $("#emailMsg").css({"color": "blue", "font-size": "0.8em"})
-                                .text("해당메일로 인증번호를 발송되었습니다.")
-
-                            // 코드가 일치하는지 확인
-                            $("input[name='authNum']").blur(function () {
-                                if (code == this.value) {
-                                    $("#emailMsg").css({"color": "blue", "font-size": "0.8em"})
-                                        .text("인증이 완료되었습니다.")
-                                    checkEmail = true;
-                                } else {
-                                    $("#emailMsg").css({"color": "red", "font-size": "0.8em"})
-                                        .text("인증번호가 일치하지 않습니다.")
-                                    checkEmail = false;
-                                }
-                            });
+                            $(".modal-body").html("<h4>" + result + "</h4>");
+                            modal.modal('show');
                         },
-                        error: function (request, status, error) {
-                            $("#emailMsg").css({"color": "red", "font-size": "0.8em"})
-                                .text("이메일을 다시 확인해 주세요.")
-                            checkEmail = false;
+                        error: function (jqXHR) {
+                            console.log(jqXHR.responseText);
+                            $(".modal-body").html("<span>" + jqXHR.responseText + "</span>");
+                            modal.modal('show');
                         }
                     });
-                });
-
-                $("input[name='name']").blur(function () {
-                    let name = this.value;
-                    let msg = $("#nameMsg");
-                    let exp = RegExp(/^[가-힣]{2,6}$/);
-                    if (name == "") {
-                        msg.css({"color": "red", "font-size": "0.8em"})
-                            .text("이름을 입력해 주세요.")
-                        checkName = false;
-                    } else {
-                        if (!exp.test(name)) {
-                            msg.css({"color": "red", "font-size": "0.8em"})
-                                .text("이름을 다시 확인해 주세요");
-                            checkName = false;
-                        } else {
-                            msg.text("");
-                            checkName = true;
-                        }
-                    }
-                });
+                }
             });
-        </script>
-    </th:block>
+        })
+    </script>
 </th:block>
+</body>
+</html>

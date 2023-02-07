@@ -1,112 +1,154 @@
 package com.example.noticeboard.controller;
 
-import com.example.noticeboard.dto.MemberDTO;
-import com.example.noticeboard.dto.PageRequestDTO;
+import com.example.noticeboard.dto.memberdto.FindPasswordDTO;
+import com.example.noticeboard.dto.memberdto.FindUsernameDTO;
+import com.example.noticeboard.dto.memberdto.MemberSaveDTO;
+import com.example.noticeboard.exception.custom_exception.ExpiredCodeException;
+import com.example.noticeboard.security.dto.MemberDTO;
 import com.example.noticeboard.service.EmailService;
-import com.example.noticeboard.security.service.MemberDetailsService;
 import com.example.noticeboard.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.boot.Banner;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 @Controller
-@Log4j2
+@Slf4j
 @RequiredArgsConstructor
-@PreAuthorize("isAnonymous()")
 public class MemberController {
 
     private final MemberService memberService;
-    private final MemberDetailsService memberDetailsService;
     private final EmailService emailService;
 
-    @GetMapping("/")
-    public String layout(){
-        return "redirect:/list";
-    }
     @GetMapping("/signup")
-    public void singup(PageRequestDTO pageRequestDTO){
+    public String signup(Model model){
+        log.info("회원가입 페이지 요청");
+        model.addAttribute("memberDTO", new MemberSaveDTO());
+        return "/signup";
     }
 
     @PostMapping("/signup")
-    public String singUp(MemberDTO memberDTO, RedirectAttributes redirectAttributes){
+    public String singUp(@Validated @ModelAttribute("memberDTO")MemberSaveDTO memberSaveDTO,
+                         BindingResult bindingResult,
+                         RedirectAttributes redirectAttributes){
         log.info("회원가입 요청");
-        boolean result = memberService.signUp(memberDTO);
-        if(result) redirectAttributes.addFlashAttribute("msg", "회원가입에 성공하였습니다.");
-        else redirectAttributes.addFlashAttribute("msg", "이미 아이디가 존재합니다.");
+
+        // 유효성 검사
+        if(!memberSaveDTO.getPassword().equals(memberSaveDTO.getPasswordConfirm()))
+            bindingResult.rejectValue("passwordConfirm","Equal");
+        if(memberService.checkUsername(memberSaveDTO.getUsername()))
+            bindingResult.rejectValue("username", "Duplication");
+        if(!memberSaveDTO.getCode().equals(emailService.getAuthCode(memberSaveDTO.getEmail())))
+            bindingResult.rejectValue("code", "Equal");
+        if(bindingResult.hasErrors()){ return "/signup"; }
+
+        MemberDTO memberDTO = MemberDTO.builder()
+                .username(memberSaveDTO.getUsername())
+                .password(memberSaveDTO.getPassword())
+                .email(memberSaveDTO.getEmail())
+                .name(memberSaveDTO.getName())
+                .build();
+        memberService.signUp(memberDTO);
+        redirectAttributes.addFlashAttribute("msg","회원가입에 성공하였습니다.");
         return "redirect:/list";
     }
 
-    @PostMapping("/check/email")
-    @ResponseBody
-    public int mailCheck(String email) throws Exception {
-        log.info("이메일 인증요청: ");
-        int code = emailService.sendMail(email);
-        return code;
-    }
 
-    @PostMapping("/check/username")
-    @ResponseBody
-    public boolean checkUserNmae(String username){
-        log.info("아이디 중복 확인 요청");
-        try {
-            memberDetailsService.loadUserByUsername(username);
-        }catch(UsernameNotFoundException e) {
-            return true;
-        }
-        return false;
-    }
 
     @GetMapping("/login")
-    public void loginForm(PageRequestDTO pageRequestDTO,
-                          @RequestParam(value = "error", required = false)String error,
+    public String loginForm(@RequestParam(value = "error", required = false)Integer error,
                           HttpServletRequest request,
                           Model model){
+        log.info("로그인 페이지 요청");
         String referrer = request.getHeader("Referer");
         request.getSession().setAttribute("prevPage", referrer);
-        log.info("로그인 화면 요청");
         model.addAttribute("error", error);
+        return "/login";
     }
 
+
+    @GetMapping("/userInfo")
+    public String userInfo(@AuthenticationPrincipal MemberDTO memberDTO, Model model){
+        log.info("유저 정보 페이지 요청");
+        model.addAttribute("memberDTO", memberDTO);
+        return "/userInfo";
+    }
+
+    @PostMapping("/modify/user")
+    public String modifyUser(@Validated @ModelAttribute("memberDTO") MemberSaveDTO memberSaveDTO,
+                             BindingResult bindingResult,
+                             RedirectAttributes redirectAttributes){
+        if(bindingResult.hasErrors()){ return "/userInfo"; }
+        log.info("유저정보 수정 요청");
+        MemberDTO memberDTO = MemberDTO.builder()
+                .username(memberSaveDTO.getUsername())
+                .password(memberSaveDTO.getPassword())
+                .email(memberSaveDTO.getEmail())
+                .name(memberSaveDTO.getName())
+                .build();
+        memberService.modify(memberDTO);
+        redirectAttributes.addFlashAttribute("msg", "수정이 완료되었습니다.");
+        return "redirect:/list";
+    }
 
     @GetMapping("/find/username")
-    public void findUsernameForm(PageRequestDTO pageRequestDTO){
+    public String findUsernameForm(Model model) {
+        log.info("아이디 찾기 페이지 요청");
+        model.addAttribute("memberDTO", new FindUsernameDTO());
+        return "/find/username";
+    }
 
-    }
-    @PostMapping("/find/username")
-    @ResponseBody
-    public ResponseEntity<Map<String, String>> findUsername(@RequestBody MemberDTO memberDTO){
-        log.info("아이디 찾기 요청");
-        Map<String, String> map = memberService.findUsername(memberDTO);
-        if(map.size() == 0){
-            return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(map, HttpStatus.OK);
-    }
 
     @GetMapping("/find/password")
-    public void findPasswordForm(PageRequestDTO pageRequestDTO){
+    public String findPasswordForm(Model model){
+        log.info("비밀번호 찾기 페이지 요청");
+        model.addAttribute("memberDTO", new FindPasswordDTO());
+        return "/find/password";
     }
 
+    @PostMapping("/find/username")
+    public String findUsername(@Validated @ModelAttribute("memberDTO") FindUsernameDTO findUsernameDTO,
+                               BindingResult bindingResult,
+                               RedirectAttributes redirectAttributes){
+        log.info("아이디 찾기 요청");
+
+        try {
+            if(!findUsernameDTO.getCode().equals(emailService.getAuthCode(findUsernameDTO.getEmail())))
+                bindingResult.rejectValue("code", "Equal");
+        }catch (ExpiredCodeException e){
+            bindingResult.rejectValue("code", "Expire");
+        }
+        if(bindingResult.hasErrors()) return "/find/username";
+
+        String username = memberService.findUsername(findUsernameDTO.getEmail(), findUsernameDTO.getName());
+        redirectAttributes.addFlashAttribute("msg", "아이디: " + username);
+        return "redirect:/list";
+    }
 
     @PostMapping("/find/password")
-    @ResponseBody
-    public ResponseEntity<Map<String, String>> findPassword(@RequestBody MemberDTO memberDTO){
+    public String findPassword(@Validated @ModelAttribute("memberDTO")FindPasswordDTO findPasswordDTO,
+                               BindingResult bindingResult,
+                               RedirectAttributes redirectAttributes){
         log.info("비밀번호 찾기 요청");
-        Map<String, String> map = memberService.findPassword(memberDTO);
-        if(map.size() == 0){
-            return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
+
+        //유효성 검사
+        try {
+            if(!findPasswordDTO.getCode().equals(emailService.getAuthCode(findPasswordDTO.getEmail())))
+                bindingResult.rejectValue("code", "Equal");
+        }catch (ExpiredCodeException e) {
+            bindingResult.rejectValue("code", "Expire");
         }
-        return new ResponseEntity<>(map, HttpStatus.OK);
+        if(bindingResult.hasErrors()) return "/find/password";
+
+        String password = memberService.findPassword(findPasswordDTO.getEmail(), findPasswordDTO.getUsername());
+        redirectAttributes.addFlashAttribute("msg", "임시 비밀번호: " + password);
+        return "redirect:/list";
     }
 }

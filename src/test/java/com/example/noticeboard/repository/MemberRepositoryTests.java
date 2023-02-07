@@ -18,11 +18,12 @@ public class MemberRepositoryTests {
     PasswordEncoder passwordEncoder;
 
     @Test
-    public void insertMmeberTest(){
+    public void insertMemberTest(){
         IntStream.rangeClosed(1, 100).forEach(i->{
             Member member = Member.builder()
                     .username("Member"+ i)
                     .email("Member"+i+"@sample.org")
+                    .name("name..."+i)
                     .password(passwordEncoder.encode("1111"))
                     .fromSocial(false)
                     .build();

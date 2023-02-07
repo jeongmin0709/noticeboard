@@ -13,7 +13,6 @@ public class EmailServiceTests {
     @Test
     public void sendMail() throws Exception {
         String receiver = "hw03198@gmail.com";
-        int code = emailService.sendMail(receiver);
-        System.out.println("code = " + code);
+        emailService.sendMail(receiver);
     }
 }

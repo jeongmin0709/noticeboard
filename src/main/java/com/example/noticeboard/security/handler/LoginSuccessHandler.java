@@ -28,8 +28,8 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler{
                                         Authentication authentication) throws IOException, ServletException {
 
         String uri = "/list";
-        log.info("loginSuccessHandler");
-        SavedRequest savedRequest = requestCache.getRequest(request, response);
+        Enumeration<String> parameterNames = request.getParameterNames();
+        log.info("로그인 요청 성공");
         String prevPage = (String) request.getSession().getAttribute("prevPage");
         if(prevPage != null){
             uri = prevPage;

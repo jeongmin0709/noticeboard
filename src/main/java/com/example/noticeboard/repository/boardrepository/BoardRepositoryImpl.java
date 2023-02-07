@@ -11,6 +11,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -18,8 +19,9 @@ import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
+@Slf4j
 @RequiredArgsConstructor
 public class BoardRepositoryImpl implements BoardRepositoryCustom {
 
@@ -30,28 +32,45 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
     private QImage image = QImage.image;
 
     @Override
-    public List<Object[]> getBoardWithAll(Long id) {
+    public Optional<Board> getBoardWithAll(Long id) {
 
-        List<Tuple> result = queryFactory.select(board, image)
-                .from(board)
-                .leftJoin(image).on(board.eq(image.board))
+        Board result = queryFactory.selectFrom(board)
+                .leftJoin(board.imageList).fetchJoin()
                 .leftJoin(board.member).fetchJoin()
                 .where(board.id.eq(id))
-                .fetch();
-        return result.stream().map(tuple -> tuple.toArray()).collect(Collectors.toList());
+                .fetchOne();
+        return Optional.ofNullable(result);
     }
 
+    public Optional<Board> getBoardWithImage(Long id){
+        Board result = queryFactory.selectFrom(board)
+                .leftJoin(board.imageList).fetchJoin()
+                .where(board.id.eq(id))
+                .fetchOne();
+        return Optional.ofNullable(result);
+    }
 
     @Override
-    public Page<Object[]> getBoardPage(String type, String keyword, Pageable pageable) {
+    public Page<Object[]> getBoardPage(String type, String keyword, String my, String username, Pageable pageable) {
 
-        List<Tuple> result = queryFactory.select(board, comment.count())
-                .from(board).join(board.member).fetchJoin()
+        QComment subComment = new QComment("subComment");
+
+        List<Tuple> result = queryFactory
+                .select(
+                        board,
+                        queryFactory.select(subComment.count()).
+                                from(subComment).
+                                where(subComment.board.eq(board))
+                        )
+                .from(board)
+                .leftJoin(board.member)
+                .leftJoin(board.imageList).fetchJoin()
                 .leftJoin(comment).on(board.eq(comment.board))
                 .where(
                         titleEq(type, keyword),
                         contentEq(type, keyword),
-                        writerEq(type, keyword)
+                        writerEq(type, keyword),
+                        myBoardOrComment(my, username)
                 )
                 .orderBy(
                         getOrderSpecifier(pageable.getSort())
@@ -62,14 +81,17 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                 .groupBy(board)
                 .fetch();
 
-        Long count = queryFactory.select(board.count())
-                .from(board)
+        // 페이지 처리를 위한 게시글 수를 알아오는 쿼리
+        Long count = queryFactory.select(board.countDistinct())
+                .from(board).leftJoin(comment).on(comment.board.eq(board))
                 .where(
                         titleEq(type, keyword),
                         contentEq(type, keyword),
-                        writerEq(type, keyword)
+                        writerEq(type, keyword),
+                        myBoardOrComment(my, username)
                 )
                 .fetchOne();
+
         return new PageImpl<>(result.stream().map(tuple -> tuple.toArray()).collect(Collectors.toList()), pageable, count);
     }
 
@@ -85,6 +107,13 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 
     private BooleanExpression writerEq(String type, String keyword) {
         if(type != null) return type.contains("w") ? board.member.username.containsIgnoreCase(keyword) : null;
+        else return null;
+    }
+
+    private BooleanExpression myBoardOrComment(String my, String username){
+        if(my == null || username == null) return null;
+        else if (my.equals("board")) return board.member.username.containsIgnoreCase(username);
+        else if (my.equals("comment")) return comment.member.username.containsIgnoreCase(username);
         else return null;
     }
 

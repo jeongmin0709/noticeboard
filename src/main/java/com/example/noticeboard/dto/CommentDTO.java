@@ -3,6 +3,8 @@ package com.example.noticeboard.dto;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -15,11 +17,17 @@ public class CommentDTO {
 
     private Long boardId;
 
+    private Long parentId;
+
     private String writer;
+
+    @Builder.Default
+    @ToString.Exclude
+    private List<CommentDTO> childList = new ArrayList<>();
 
     private String content;
 
-    private int recomendNum;
+    private int recommendNum;
 
     private LocalDateTime createDate;
 

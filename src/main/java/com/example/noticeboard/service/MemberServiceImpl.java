@@ -1,85 +1,88 @@
 package com.example.noticeboard.service;
 
-import com.example.noticeboard.dto.MemberDTO;
 import com.example.noticeboard.entity.member.Member;
 import com.example.noticeboard.repository.MemberRepository;
+import com.example.noticeboard.security.dto.MemberDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.security.SecureRandom;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
-@Service
 @RequiredArgsConstructor
-@Transactional
+@Service
 public class MemberServiceImpl implements MemberService{
 
+    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private final MemberRepository memberRepository;
-
-    private final EmailService emailService;
-
-    public boolean signUp(MemberDTO memberDTO){
-
-        //이름과 이메일로 조회해서 이미 회원가입이 되어있으면 회원가입 안함.
-        String name = memberDTO.getName();
-        String email = memberDTO.getEmail();
-        Optional<Member> result = memberRepository.findByNameAndEmail(name, email);
-        if(result.isPresent()) return false;
-
+    @Override
+    public void signUp(MemberDTO memberDTO) {
         Member member = dtoToEntity(memberDTO, passwordEncoder);
         memberRepository.save(member);
-        return true;
     }
 
     @Override
-    public Map<String, String> findUsername(MemberDTO memberDTO) {
-        String name = memberDTO.getName();
-        String email = memberDTO.getEmail();
-        Map<String, String> map = new HashMap<>();
-        Optional<Member> result = memberRepository.findByNameAndEmail(name, email);
-        if (result.isPresent()){
-            int code = 0;
-            try {
-                code = emailService.sendMail(email);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Member member = result.get();
-            map.put("code", Integer.toString(code));
-            map.put("username", member.getUsername());
-        }
-        return map;
+    public boolean checkUsername(String username) {
+        return memberRepository.existsByUsername(username);
     }
 
     @Override
-    public Map<String, String> findPassword(MemberDTO memberDTO) {
-        String username = memberDTO.getUsername();
-        String email = memberDTO.getEmail();
-        Map<String, String> map = new HashMap<>();
+    public boolean checkEmail(String email) {
+        return memberRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean checkUsernameAndEmail(String username, String email) {
+        return memberRepository.existsByUsernameAndEmail(username, email);
+    }
+
+    @Override
+    public boolean checkNameAndEmail(String name, String email) {
+        return memberRepository.existsByNameAndEmail(name, email);
+    }
+
+
+    @Override
+    public boolean checkPassword(String username, String password) {
         Optional<Member> result = memberRepository.findByUsername(username, false);
+        if(result.isEmpty()) throw new UsernameNotFoundException("계정을 찾을 수 없습니다.");
         Member member = result.get();
-        if(member.getEmail().equals(email)){
-            int code = 0;
-            try {
-                code = emailService.sendMail(email);
-            }catch (Exception e) {
-                e.printStackTrace();
-            }
-            String tempPassword = getRamdomPassword(10);
-            member.changePassword(passwordEncoder.encode(tempPassword));
-            map.put("code", Integer.toString(code));
-            map.put("tempPassword",tempPassword);
-        }
-        return map;
+        return passwordEncoder.matches(password, member.getPassword());
     }
-    private String getRamdomPassword(int size) {
+
+    @Override
+    public void modify(MemberDTO memberDTO) {
+        Optional<Member> result = memberRepository.findByUsername(memberDTO.getUsername(), false);
+        if(result.isEmpty()) throw new UsernameNotFoundException("계정을 찾을 수 없습니다.");
+        Member member = result.get();
+        member.setEmail(memberDTO.getEmail());
+        member.setPassword(passwordEncoder.encode(memberDTO.getPassword()));
+    }
+
+    @Override
+    public String findUsername(String email, String name) {
+        Optional<Member> result = memberRepository.findByEmail(email, false);
+        if(result.isEmpty()) throw new UsernameNotFoundException("계정을 찾을 수 없습니다.");
+        Member member = result.get();
+        return member.getUsername();
+    }
+
+
+    @Override
+    public String findPassword(String email, String username) {
+        Optional<Member> result = memberRepository.findByEmail(email, false);
+        if(result.isEmpty()) throw new UsernameNotFoundException("계정을 찾을 수 없습니다.");
+        Member member = result.get();
+        String tempPassword = makeRandomPassword(12);
+        member.setPassword(passwordEncoder.encode(tempPassword));
+        return tempPassword;
+    }
+
+    private String makeRandomPassword(int size) {
         char[] charSet = new char[] {
                 '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
                 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',

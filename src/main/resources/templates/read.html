@@ -1,384 +1,466 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<th:block th:replace="~{/layout :: setContent(~{this :: content})}">
-    <th:block th:fragment="content">
-        <div class="inner" style="max-width: 900px">
-            <div class="row">
-                <div class="col-9"><h1>NoticeBoard Read</h1></div>
-                <div class="col-3 d-flex justify-content-end boardBtnbox">
-                    <button type="button" class="btn btn-primary recomendBtn">추천 하기</button>
-                    <button type="button" class="btn btn-warning modifyBtn">수정 하기</button>
-                    <button type="button" class="btn btn-danger removeBtn">삭제 하기</button>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{/layout :: setContent(~{this :: title}, ~{this :: link}, ~{this :: content})}">
+<header>
+    <title th:text="#{title.read}">Notice Board Read</title>
+    <th:block th:fragment="link"></th:block>
+</header>
+<body>
+<th:block th:fragment="content">
+    <!--content-->
+    <section class="py-5" id="scroll-target">
+        <div class="container px-lg-5">
+            <div class="row border-bottom border-secondary border-4 py-3 mx-1">
+                <div class="col-md-5 px-0 py-3 py-md-0 d-flex justify-content-center justify-content-md-start"><h1 th:text="#{title.read}">게시글</h1></div>
+                <div class="col-md-7 px-0 d-flex justify-content-end boardBtn-group">
+                    <a class="btn btn-warning me-2 d-none" id="modifyBtn" th:href="@{/modify/{id}(id=${boardDTO.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type},
+                            keyword=${pageRequestDTO.keyword}, order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}"><i class="bi bi-pencil-square"></i>&nbsp;<span th:text="#{link.modify}">수정</span></a>
+                    <a class="btn btn-danger me-2 d-none" id="removeBtn"><i class="bi bi-trash3"></i>&nbsp;<span th:text="#{link.remove}">삭제</span></a>
+                    <a class="btn btn-primary" th:href="@{/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword},
+                           order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}"><i class="bi bi-list"></i>&nbsp;<span th:text="#{link.list}">목록</span></a>
                 </div>
             </div>
-            <div class="form-group">
-                <div class="row">
-                    <div class="col-2"><h5><strong>제목</strong></h5></div>
-                    <div class="col-10 BoardInfo">
-                        <ul class="d-flex justify-content-end">
-                            <li>작성일: [[${#temporals.format(BoardDTO.createDate, 'yyyy-MM-dd HH:mm:ss')}]]</li>
-                            <li class="boardRecomendNum">추천수: [[${BoardDTO.recomendNum}]]</li>
-                            <li>조회수: [[${BoardDTO.viewNum}]]</li>
-                        </ul>
-
+            <div class="row" th:object="${boardDTO}">
+                <div class="col-lg-8">
+                    <div class="border-bottom py-4 title">
+                        <h3 class="text-break" th:text="*{title}">제목</h3>
+                        <div class="d-flex justify-content-end">
+                            <strong class="mb-0 fs-5" th:text="*{writer}">작성자</strong>&nbsp;
+                        </div>
+                    </div>
+                    <div class="board-info">
+                        <ol class="breadcrumb fs-6 opacity-75">
+                            <li class="breadcrumb-item" th:text="*{#temporals.format(createDate, 'yyyy-MM-dd HH:mm:ss')}">등록일</li>
+                            <li class="breadcrumb-item"><i class="bi bi-hand-thumbs-up-fill"></i>&nbsp;<span class="recomendNum" th:text="*{recomendNum}">추천수</span></li>
+                            <li class="breadcrumb-item"><i class="bi bi-eye-fill"></i>&nbsp;<span th:text="*{viewNum}">조회수</span></li>
+                            <li class="breadcrumb-item "><i class="bi bi-chat-fill"></i>&nbsp;<span class="commentNum">댓글수</span></li>
+                        </ol>
+                    </div>
+                    <div class="content">
+                    </div>
+                    <div class="d-flex justify-content-center py-5 border-bottom border-1">
+                        <button class="btn btn-primary fs-5 rounded-2" id="recomendBtn" type="button">
+                            <i class="bi bi-hand-thumbs-up-fill"></i>&nbsp;<span th:text="#{button.recommend}">추천</span>&nbsp;(<span class="recomendNum" th:text="*{recomendNum}"></span>)
+                        </button>
+                    </div>
+                    <div class="comment-content">
+                        <div class="py-4">
+                            <h3><i class="bi bi-chat"></i>&nbsp;<span th:text="#{h2.comment}">댓글</span>&nbsp;(<span class="commentNum"></span>)</h3>
+                        </div>
+                        <div class="mb-4 comment-register">
+                            <div contenteditable="true" class="me-sm-2 fs-5" id="comment-register-content" placeholder="댓글을 입력해 주세요."></div>
+                            <div class="d-flex justify-content-end registerBtn-group pt-2">
+                                <button class="btn btn-outline-success rounded-3 me-1" id="commentRegisterBtn" th:text="#{button.register}">등록</button>
+                                <button class="btn btn-outline-secondary rounded-3" id="registerCancelBtn" th:text="#{button.cancel}">취소</button>
+                            </div>
+                        </div>
+                        <div class="commentList">
+                            <ul class="list-group list-group-flush ps-0">
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                <input type="text" name="title" placeholder="제목" th:value="${BoardDTO.title}" readonly>
-            </div>
-            <div class="form-group">
-                <h5><strong>내용</strong></h5>
-                <textarea name="content" placeholder="내용을 입력해 주세요." rows="15"
-                          readonly>[[${BoardDTO.content}]]</textarea>
-            </div>
-            <div class="uploadResult">
-                <ul>
-                    <li th:each="ImageDTO : ${BoardDTO.imageDTOList}" th:data-file="${ImageDTO.imageURL}">
-                        <img th:if="${ImageDTO.folderPath != null}"
-                             th:src="|/display?fileName=${ImageDTO.thumbnailURL}|">
-                    </li>
-                </ul>
-            </div>
-            <div class="commentRegister">
-                <textarea name="register"></textarea>
-                <button type="button" class="btn special commentRegisterBtn" style="height: 79px; margin-left: 10px">댓글
-                    등록
-                </button>
-            </div>
-            <div class="commentList">
-                <ul>
-                </ul>
+                <div class="d-none d-lg-block col-lg-4">
+                    <div class="border sticky-top vh-100">
+                        <ul class="mx-3 list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <strong>작성자</strong>
+                                <span th:text="*{writer}"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <strong>작성일</strong>
+                                <span th:text="*{#temporals.format(createDate, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <strong>추천수</strong>
+                                <span class="recomendNum" th:text="*{recomendNum}"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <strong>조회수</strong>
+                                <span th:text="*{viewNum}"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <strong>댓글수</strong>
+                                <span class="commentNum"></span>
+                            </li>
+                        </ul>
+                        <div class="position-absolute bottom-0 start-0 w-100">
+                            <div class="btn-group w-100" role="group">
+                                <a class="btn btn-outline-secondary border px-2 py-2 w-25"><i
+                                        class="bi bi-arrow-left-square-fill fs-2"></i></a>
+                                <a class="btn btn-outline-secondary border py-2 w-50" th:href="@{/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword},
+                                        order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}"><i
+                                        class="bi bi-list fs-2"></i></a>
+                                <a class="btn btn-outline-secondary border px-2 py-2 w-25"><i class="bi bi-arrow-right-square-fill fs-2"></i></a>
+                            </div>
+                            <a class="btn btn-dark w-100 fs-5" th:href="@{/register(page=${pageRequestDTO.page}, type=${pageRequestDTO.type},
+                                    keyword=${pageRequestDTO.keyword}, order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}">글쓰기</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
-
-        <style>
-            .modifyBtn {
-                margin-right: 6px
+    </section>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            //권한에맞는 버튼 보여주기
+            if ([[${boardDTO.writer}]] == [[${#authentication.name}]]) {
+                $("#modifyBtn").removeClass('d-none');
+                $("#removeBtn").removeClass('d-none');
             }
 
-            .boardBtnbox button {
-                display: none;
-                height: 46px;
-            }
+            $(".content").html([[${boardDTO.content}]]);
+            $("img").addClass("img-fluid");
 
-            .commentRegister {
-                display: flex;
-                margin-bottom: 10px;
-            }
+            let commentListUL = $(".commentList ul");
+            let boardId = [[${boardDTO.id}]];
+            let boardWriter = [[${boardDTO.writer}]];
 
-            label {
-                font-size: 1em;
-            }
+            getCommentList('id');
 
-            .uploadResult {
-                width: 100%;
-                background-color: #f8d1d2;
-                margin-top: 5px;
-            }
+            function getCommentList(order) {
+                $.getJSON("/comment/list/" + boardId + "/" + order, function (commentList) {
+                    let str = "";
+                    //댓글 출력
+                    $.each(commentList, function (idx, comment) {
+                        str += "<li class='list-group-item px-0'>"
+                        str += "    <div class='row comment-title'>"
+                        str += "        <div class='col-sm comment-writer'>"
+                        str += "            <strong>" + comment.writer + "</strong>"
+                        str += "        </div>"
+                        str += "        <div class='col-sm d-flex justify-content-start justify-content-sm-end comment-info'>"
+                        str += "            <ol class='breadcrumb fs-6 opacity-75'>"
+                        str += "                <li class='breadcrumb-item'><i class='bi bi-hand-thumbs-up'></i> <span class='commentRecomendNum'>" + comment.recommendNum + "</span></li>"
+                        str += "                <li class='breadcrumb-item'>" + formatTime(comment.createDate) + "</li>"
+                        str += "            </ol>"
+                        str += "        </div>"
+                        str += "    </div>"
+                        str += "    <div class='comment-content'>" + comment.content + "</div>"
 
-            .uploadResult ul {
-                vertical-align: top;
-                display: flex;
-                padding: 0 22px;
-            }
-
-            .uploadResult ul li {
-                list-style: none;
-                width: 140px;
-                height: 150px;
-                position: relative;
-                margin: 15px;
-                display: flex;
-                padding: 0px;
-            }
-
-            .uploadResult ul li img {
-                position: absolute;
-                width: 160px;
-                clip: rect(0, 140px, 150px, 0);
-                z-index: 0;
-            }
-
-            .BoardInfo ul li {
-                display: inline;
-                border-left: 1px solid #999;
-                font: bold 0.9em Dotum;
-                padding: 0 5px;
-            }
-
-            .BoardInfo ul {
-                padding-left: 0px;
-                margin-top: 3px;
-            }
-
-            .BoardInfo ul li:first-child {
-                border-left: none;
-            }
-
-
-            .commentList ul li {
-                padding-bottom: 9px;
-                padding-top: 9px;
-                border-top: 2px solid #fceced;
-            }
-
-            .commentList ul {
-                list-style: none;
-                padding-left: 0px;
-            }
-
-            .commentList button {
-                padding-top: 3px;
-                padding-bottom: 3px;
-                padding-left: 10px;
-                padding-right: 10px;
-                height: 25px;
-                font-size: 0.7em;
-            }
-
-            .commentList ul li:last-child {
-                border-bottom: 2px solid #fceced;
-            }
-        </style>
-
-
-        <script th:inline="javascript">
-            $(document).ready(function () {
-                //권한에맞는 버튼 보여주기
-                if ([[${BoardDTO.writer}]] == [[${#authentication.name}]]) {
-                    $(".modifyBtn").show();
-                    $(".removeBtn").show();
-                } else $(".recomendBtn").show();
-
-                let boardId = [[${BoardDTO.id}]];
-                let boardWriter = [[${BoardDTO.writer}]];
-                let listGroup = $(".commentList ul");
-
-                getCommentList();
-
-                //게시글 추천 이벤트
-                $(document).on("click", ".recomendBtn", function () {
-                    let recomendNum = $(".boardRecomendNum");
-                    if (confirm("이 글을 추천하시겠습니까?") == true) {
-                        let data = {id: boardId, writer: boardWriter};
-                        $.ajax({
-                            url: '/recomend',
-                            type: "POST",
-                            data: data,
-                            success: function (result) {
-                                recomendNum.text("추천수: " + result);
-                            },
-                            error: function (jqXHR, error) {
-                                if (jqXHR.status == '403') {
-                                    location.href = "/login";
-                                }
+                        str += "    <div class='d-flex justify-content-between pt-2 commentBtn-group' data-parent_id='" + comment.id + "' data-id='" + comment.id + "' data-writer='" + comment.writer + "'>"
+                        str += "        <div class='d-flex'>"
+                        str += "            <button type='button' class='btn btn-outline-success small rounded-3 commentRecomendBtn'><i class='bi bi-hand-thumbs-up-fill'></i></button>"
+                        str += "            <button type='button' class='btn btn-outline-primary small rounded-3 child-register-btn'>답글</button>"
+                        str += "        </div>"
+                        str += "        <div class='d-flex'>"
+                        if (comment.writer == [[${#authentication.name}]]) {
+                            str += "        <button type='button' class='btn btn-outline-warning small rounded-3 commentModifyBtn'>수정</button>"
+                            str += "        <button type='button' class='btn btn-outline-success small d-none rounded-3 commentSubmitBtn'>제출</button>"
+                            str += "        <button type='button' class='btn btn-outline-secondary small d-none rounded-3 commentCancelBtn'>취소</button>"
+                            str += "        <button type='button' class='btn btn-outline-danger small rounded-3 commentRemoveBtn'>삭제</button>"
+                        }
+                        str +="          </div>"
+                        str += "    </div>"
+                        str += "    <div class='d-none child-register'>"
+                        str += "        <div contenteditable='true' class='my-2 child-register-content' placeholder='답글을 입력해 주세요.'></div>"
+                        str += "        <div class='commentBtn-group d-flex justify-content-end'>"
+                        str += "            <button type='button' class='btn btn-outline-success small rounded-3 childSubmitBtn'>제출</button>"
+                        str += "            <button type='button' class='btn btn-outline-secondary small rounded-3 childCancelBtn'>취소</button>"
+                        str += "        </div>"
+                        str += "    </div>"
+                        if(comment.childList.length > 0) {
+                            str += "    <div class='commentBtn-group pt-1'>"
+                            str += "            <button class='btn btn-secondary small rounded-3' type='button' data-bs-toggle='collapse' data-bs-target='#child_list" + idx + "'>"
+                            str += "                답글보기 (" + comment.childList.length + ")"
+                            str += "            </button>"
+                            str += "   </div>"
+                        }
+                        str += "</li>"
+                        str += "<div class='collapse' id='child_list"+idx+"'>"
+                        str += "    <ul class='list-group list-group-flush ps-5'>"
+                        //답글 출력
+                        $.each(comment.childList, function (idx, child) {
+                            str += "<li class='list-group-item'>"
+                            str += "    <div class='row comment-title'>"
+                            str += "        <div class='col-sm comment-writer'>"
+                            str += "            <strong>" + child.writer + "</strong>"
+                            str += "        </div>"
+                            str += "        <div class='col-sm d-flex justify-content-start justify-content-sm-end comment-info'>"
+                            str += "            <ol class='breadcrumb fs-6 opacity-75'>"
+                            str += "                <li class='breadcrumb-item'><i class='bi bi-hand-thumbs-up'></i> <span class='commentRecomendNum'>" + child.recommendNum + "</span></li>"
+                            str += "                <li class='breadcrumb-item'>" + formatTime(child.createDate) + "</li>"
+                            str += "            </ol>"
+                            str += "        </div>"
+                            str += "    </div>"
+                            str += "        <div class='comment-content'>" + child.content + "</div>"
+                            str += "            <div class='d-flex justify-content-between pt-2 commentBtn-group' data-parent_id='"+comment.id+"' data-id='" + child.id + "' data-writer='" + child.writer + "'>"
+                            str += "                <div class='d-flex'>"
+                            str += "                    <button type='button' class='btn btn-outline-success small rounded-3 commentRecomendBtn'><i class='bi bi-hand-thumbs-up-fill'></i></button>"
+                            str += "                    <button type='button' class='btn btn-outline-primary small rounded-3 child-register-btn'>답글</button>"
+                            str += "                </div>"
+                            str += "                <div class='d-flex'>"
+                            if (child.writer == [[${#authentication.name}]]) {
+                                str += "                <button type='button' class='btn btn-outline-warning small rounded-3 commentModifyBtn'>수정</button>"
+                                str += "                <button type='button' class='btn btn-outline-success small d-none rounded-3 commentSubmitBtn'>제출</button>"
+                                str += "                <button type='button' class='btn btn-outline-secondary small d-none rounded-3 commentCancelBtn'>취소</button>"
+                                str += "                <button type='button' class='btn btn-outline-danger small rounded-3 commentRemoveBtn'>삭제</button>"
                             }
-                        })
+                            str += "                </div>"
+                            str += "            </div>"
+                            str += "            <div class='child-register d-none'>"
+                            str += "                <div contenteditable='true' class='my-2 child-register-content' placeholder='답글을 입력해 주세요.'></div>"
+                            str += "                <div class='commentBtn-group d-flex justify-content-end'>"
+                            str += "                    <button type='button' class='btn btn-outline-success small rounded-3 childSubmitBtn'>제출</button>"
+                            str += "                    <button type='button' class='btn btn-outline-secondary small rounded-3 childCancelBtn'>취소</button>"
+                            str += "                </div>"
+                            str += "            </div>"
+                            str += "        </li>"
+                        });
+                        str += "        </ul>"
+                        str += "    </div>"
+                    });
+                    $(".commentNum").text(commentList.length)
+                    commentListUL.html(str);
+                });
+           }
+
+
+            function formatTime(str) {
+                var date = new Date(str);
+                return date.getFullYear() + '-' +
+                    (date.getMonth() + 1) + '-' +
+                    date.getDate() + ' ' +
+                    date.getHours() + ':' +
+                    date.getMinutes() + ' :' +
+                    date.getSeconds();
+            }
+
+            //게시글 추천 이벤트
+            $("#recomendBtn").click(function () {
+                let recomendNum = $(".recomendNum");
+                if (confirm("이 글을 추천하시겠습니까?") == true) {
+                    $.ajax({
+                        url: '/recomend/' + boardId + '/' + boardWriter,
+                        type: "patch",
+                        success: function (result) {
+                            recomendNum.text(result);
+                        },
+                        error: function (jqXHR) {
+                            if (jqXHR.status == '401') {
+                                location.href = "/login";
+                            }else if(jqXHR.status == '403'){
+                                alert("자신의 게시글은 추천할 수 없습니다.")
+                            } else if(jqXHR.status == '404'){
+                                alert(jqXHR.responseText);
+                            }else alert(jqXHR.responseText);
+                        }
+                    })
+                }
+            });
+
+            //게시글 삭제 이벤트
+            $("#removeBtn").click(function () {
+                if (confirm("게시글을 삭제 하시겠습니까?") == true) {
+                    let pageRequestDTO = [[${pageRequestDTO}]];
+                    let form = $('<form></form>');
+                    form.attr("method", "post");
+                    form.attr("action", "/remove/"+boardId);
+                    form.appendTo('body');
+                    form.append($('<input/>', {type: 'hidden', name: 'writer', value: boardWriter}));
+                    form.append($('<input/>', {type: 'hidden', name: 'page', value: pageRequestDTO.page}));
+                    form.append($('<input/>', {type: 'hidden', name: 'type', value: pageRequestDTO.type}));
+                    form.append($('<input/>', {type: 'hidden', name: 'keyword', value: pageRequestDTO.keyword}));
+                    form.append($('<input/>', {type: 'hidden', name: 'order', value: pageRequestDTO.order}));
+                    form.append($('<input/>', {type: 'hidden', name: 'my', value: pageRequestDTO.my}));
+                    form.submit();
+                }
+            })
+
+            //댓글 등록 이벤트
+            $("#commentRegisterBtn").click(function () {
+                let content = $("#comment-register-content");
+                let writer = [[${#authentication.name}]];
+                let data = {
+                    boardId: boardId,
+                    content: content.html(),
+                    writer: writer,
+                };
+                $.ajax({
+                    url: "/comment",
+                    method: "post",
+                    data: JSON.stringify(data),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        alert(result+"번 댓글이 등록되었습니다.");
+                        content.text("");
+                        getCommentList('id');
+                    },
+                    error: function (jqXHR) {
+                        if (jqXHR.status == '401') {
+                            location.href = "/login";
+                        }else if(jqXHR.status == '403'){
+                            alert("권한이 없습니다.")
+                        } else if(jqXHR.status == '404'){
+                            alert(jqXHR.responseText);
+                        }else alert(jqXHR.responseText);
                     }
                 });
+            });
+            //댓글 등록 취소 이벤트
+            $("#registerCancelBtn").click(function () {
+                let content = $("#comment-register-content");
+                content.html("");
+            });
+            //답글 등록 이벤트
+            $(".commentList").on("click", ".child-register-btn", function () {
 
-                //게시글 삭제 이벤트
-                $(document).on("click", ".removeBtn", function () {
-                    if (confirm("게시글을 삭제 하시겠습니까?") == true) {
-                        let form = $('<form></form>');
-                        form.attr("method", "post");
-                        form.attr("action", "/remove");
-                        form.appendTo('body');
-                        form.append($('<input/>', {type: 'hidden', name: 'id', value: boardId}));
-                        form.append($('<input/>', {type: 'hidden', name: 'writer', value: boardWriter}));
-                        form.submit();
-                    }
-                })
-
-                //게시글 수정 이벤트
-                $(document).on("click", ".modifyBtn", function () {
-                    let page = [[${pageRequestDTO.page}]];
-                    let type = [[${pageRequestDTO.type}]];
-                    let keyword = [[${pageRequestDTO.keyword}]];
-                    location.href = "/modify?id=" + boardId + "&page=" + page + "&type=" + type + "&keyword=" + keyword;
-
-                });
-
-                //댓글 등록 이벤트
-                $(document).on("click", ".commentRegisterBtn", function () {
-                    let content = $("textarea[name='register']").val();
-                    let writer = [[${#authentication.name}]];
-                    let comment = {boardId: boardId, content: content, writer: writer};
+                let writer = [[${#authentication.name}]];
+                let id = $(this).closest(".commentBtn-group").data("id");
+                let parentId = $(this).closest(".commentBtn-group").data("parent_id");
+                let receiver = $(this).closest(".commentBtn-group").data("writer");
+                let div = $(this).closest(".commentBtn-group").siblings(".child-register");
+                let content = div.find(".child-register-content");
+                if(parentId)
+                if(parentId != id && content.html() == "") content.append("<strong contenteditable='false'><mark>@"+receiver+"</mark>&nbsp&nbsp</strong>")
+                div.removeClass("d-none");
+                div.on("click", ".childSubmitBtn", function (){
+                    let data = {
+                        boardId: boardId,
+                        content: content.html(),
+                        writer: writer,
+                        parentId: parentId
+                    };
+                    console.log(data);
                     $.ajax({
                         url: "/comment",
                         method: "post",
-                        data: JSON.stringify(comment),
+                        data: JSON.stringify(data),
                         contentType: 'application/json; charset=utf-8',
-                        success: function (reuslt) {
-                            let id = parseInt(reuslt);
-                            alert("댓글이 등록되었습니다.");
-                            getCommentList();
+                        success: function (result) {
+                            alert(result+"번 답글이 등록되었습니다.");
+                            content.text("");
+                            getCommentList('id');
                         },
-                        error: function (jqXHR, error) {
-                            if (jqXHR.status == '403') {
+                        error: function (jqXHR) {
+                            if (jqXHR.status == '401') {
                                 location.href = "/login";
-                            }
+                            }else if(jqXHR.status == '403'){
+                                alert("권한이 없습니다.")
+                            } else if(jqXHR.status == '404'){
+                                alert(jqXHR.responseText);
+                            }else alert(jqXHR.responseText);
                         }
                     });
                 });
-
-                //댓글 추천 이벤트
-                $(document).on("click", ".commentRecomendBtn", function () {
-                    let id = $(this).parent().data("id");
-                    let writer = $(this).parent().data("writer");
-                    let recomendNum = $(this).parents(".comment").find(".recomendNum");
-                    if (confirm("이 댓글을 추천하시겠습니까?") == true) {
-                        $.ajax({
-                            url: "/comment/recomend",
-                            type: "POST",
-                            data: {id: id, writer: writer},
-                            success: function (result) {
-                                recomendNum.text(result);
-                            },
-                            error: function (jqXHR, error) {
-                                if (jqXHR.status == '403') {
-                                    location.href = "/login";
-                                }
-                            }
-                        })
-                    }
+                div.on("click", ".childCancelBtn",function (){
+                    div.addClass("d-none");
                 });
 
-                //댓글 삭제 이벤트
-                $(document).on("click", ".commentRemoveBtn", function () {
-
-                    let id = $(this).parent().data("id");
-                    let writer = $(this).parent().data("writer");
-
-                    if (confirm("이 댓글을 삭제하시겠습니까?") == true) {
-                        $.ajax({
-                            url: "/comment",
-                            method: "delete",
-                            data: {id: id, writer: writer},
-                            success: function (reuslt) {
-                                if (reuslt == 'success') {
-                                    getCommentList();
-                                }
-                            },
-                            error: function (jqXHR, error) {
-                                if (jqXHR.status == '403') {
-                                    location.href = "/login";
-                                }
-                            }
-                        })
-                    }
-                });
-
-                // 댓글 수정 이벤트
-                $(document).on("click", ".commentModifyBtn", function () {
-                    let id = $(this).parent().data("id");
-                    let writer = $(this).parent().data("writer");
-                    let content = $(this).closest("li").find(".commentContent div");
-                    let contentText = content.text();
-                    let recomendNum = $(this).closest(".comment").find(".recomendNum").text();
-
-                    if (confirm("이 댓글을 수정하시겠습니까?") == true) {
-
-                        let cancelBtn = $(this).siblings(".commentCancelBtn");
-                        let removeBtn = $(this).siblings(".commentRemoveBtn");
-                        let submitBtn = $(this).siblings(".commentSubmitBtn");
-                        let recomendBtn = $(this).siblings(".commentRecomendBtn");
-                        let modifyBtn = $(this);
-                        content.html("<textarea name='commentContent'>" + content.text() + "</textarea>");
-
-                        modifyBtn.hide();
-                        removeBtn.hide();
-                        recomendBtn.hide();
-                        submitBtn.show();
-                        cancelBtn.show();
-
-                        // 수정된 댓글 제출 이벤트
-                        submitBtn.click(function () {
-                            let modifyContent = $(this).closest("li").find("textarea[name='commentContent']").val();
-                            let comment = {
-                                id: id,
-                                boardId: boardId,
-                                writer: writer,
-                                content: modifyContent,
-                                recomendNum: recomendNum
-                            }
-                            console.log(comment);
-                            $.ajax({
-                                url: '/comment',
-                                method: 'put',
-                                data: JSON.stringify(comment),
-                                contentType: 'application/json; charset=utf-8',
-                                success: function (result) {
-                                    if (result === 'success') {
-                                        getCommentList();
-                                    }
-                                },
-                                error: function (jqXHR, error) {
-                                    if (jqXHR.status == '403') {
-                                        location.href = "/login";
-                                    }
-                                }
-                            })
-                        });
-
-                        //댓글 수정을 취소하는 이벤트
-                        cancelBtn.click(function () {
-                            content.html(contentText);
-                            cancelBtn.hide();
-                            submitBtn.hide();
-                            removeBtn.show();
-                            recomendBtn.show();
-                            modifyBtn.show();
-                            return;
-                        });
-                    } else {
-                        return;
-                    }
-                });
-
-                function formatTime(str) {
-                    var date = new Date(str);
-                    return date.getFullYear() + '-' +
-                        (date.getMonth() + 1) + '-' +
-                        date.getDate() + ' ' +
-                        date.getHours() + ':' +
-                        date.getMinutes() + ' :' +
-                        date.getSeconds();
+            });
+            //댓글 추천 이벤트
+            $(".commentList").on("click", ".commentRecomendBtn", function () {
+                let id = $(this).closest(".commentBtn-group").data("id");
+                let writer = $(this).closest(".commentBtn-group").data("writer");
+                let recomendNum = $(this).closest("li").find(".commentRecomendNum");
+                if (confirm("이 댓글을 추천하시겠습니까?") == true) {
+                    $.ajax({
+                        url: "/comment/"+id+"/"+writer,
+                        type: "patch",
+                        success: function (result) {
+                            alert(result+"번 댓글을 추천하였습니다.")
+                            recomendNum.text(result);
+                        },
+                        error: function (jqXHR) {
+                            if (jqXHR.status == '401') {
+                                location.href = "/login";
+                            }else if(jqXHR.status == '403'){
+                                alert("자신의 댓글은 추천할 수 없습니다.")
+                            } else if(jqXHR.status == '404'){
+                                alert(jqXHR.responseText);
+                            }else alert(jqXHR.responseText);
+                        }
+                    })
                 }
+            });
 
-                //댓글 리스트 가져오는 함수
-                function getCommentList() {
-                    $.getJSON("/comment/" + boardId, function (commentList) {
-                        console.log(commentList)
-                        let str = "";
-                        $.each(commentList, function (idx, comment) {
-                            console.log(comment)
-                            str += "<li>"
-                            str += "    <div class='row comment'>"
-                            str += "        <div class='col-8 commentInfo'>"
-                            str += "            <b>[" + comment.id + "]</b> <strong class='writer'>" + comment.writer + "</strong> <small>" + formatTime(comment.createDate) + " 추천수:</small> <small class='recomendNum'>" + comment.recomendNum + "</small>"
-                            str += "        </div>"
-                            str += "        <div class='col-4 d-flex justify-content-end' data-id='" + comment.id + "' data-writer='" + comment.writer + "'>"
-                            if (comment.writer == [[${#authentication.name}]]) {
-                                str += "            <button type='button' class='btn btn-warning commentModifyBtn'>수정</button>"
-                                str += "            <button type='button' class='btn btn-warning commentSubmitBtn' style='display: none'>수정 하기</button>"
-                                str += "            <button type='button' class='btn btn-danger commentCancelBtn' style='display: none'>취소</button>"
-                                str += "            <button type='button' class='btn btn-danger commentRemoveBtn'>삭제</button>"
-                            } else {
-                                str += "            <button type='button' class='btn btn-primary commentRecomendBtn'>추천</button>"
+            //댓글 삭제 이벤트
+            $(".commentList").on("click", ".commentRemoveBtn", function () {
+                let id = $(this).closest(".commentBtn-group").data("id");
+                let writer = $(this).closest(".commentBtn-group").data("writer");
+                if (confirm("이 댓글을 삭제하시겠습니까?") == true) {
+                    $.ajax({
+                        url: "/comment/"+id+"/"+writer,
+                        method: "delete",
+                        success: function (reuslt) {
+                            alert(reuslt+"번 댓글을 삭제하였습니다.")
+                            getCommentList("id");
+                        },
+                        error: function (jqXHR) {
+                            if (jqXHR.status == '401') {
+                                location.href = "/login";
+                            }else if(jqXHR.status == '403'){
+                                alert("권한이 없습니다.")
+                            } else if(jqXHR.status == '404'){
+                                alert(jqXHR.responseText);
+                            }else alert(jqXHR.responseText);
+                        }
+                    })
+                }
+            });
+
+            // 댓글 수정 이벤트
+            $(".commentList").on("click", ".commentModifyBtn", function () {
+                let id = $(this).closest(".commentBtn-group").data("id");
+                let writer = $(this).closest(".commentBtn-group").data("writer");
+                let content = $(this).closest(".commentBtn-group").siblings(".comment-content");
+                let contentHtml = content.html();
+
+                if (confirm("이 댓글을 수정하시겠습니까?") == true) {
+
+                    let cancelBtn = $(this).siblings(".commentCancelBtn");
+                    let removeBtn = $(this).siblings(".commentRemoveBtn");
+                    let submitBtn = $(this).siblings(".commentSubmitBtn");
+                    let modifyBtn = $(this);
+                    content.attr("contenteditable","true")
+
+                    modifyBtn.addClass('d-none');
+                    removeBtn.addClass('d-none');
+                    submitBtn.removeClass('d-none');
+                    cancelBtn.removeClass('d-none');
+
+                    // 수정된 댓글 제출 이벤트
+                    submitBtn.click(function () {
+                        let data = {
+                            id: id,
+                            boardId: boardId,
+                            writer: writer,
+                            content: content.html(),
+                        }
+
+                        $.ajax({
+                            url: '/comment',
+                            method: 'put',
+                            data: JSON.stringify(data),
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (result) {
+                                alert(result+"번 댓글을 수정하였습니다.")
+                                getCommentList("id");
+                            },
+                            error: function (jqXHR) {
+                                if (jqXHR.status == '401') {
+                                    location.href = "/login";
+                                }else if(jqXHR.status == '403'){
+                                    alert("권한이 없습니다.")
+                                } else if(jqXHR.status == '404'){
+                                    alert(jqXHR.responseText);
+                                }else alert(jqXHR.responseText);
                             }
-                            str += "        </div>"
-                            str += "    </div>"
-                            str += "    <div class='row commentContent' style='padding-top: 15px'>"
-                            str += "        <div class='col'>" + comment.content + "</div>"
-                            str += "    </div>"
-                            str += "</li>"
-                        });
-                        listGroup.html(str);
+                        })
+                    });
+
+                    //댓글 수정을 취소하는 이벤트
+                    cancelBtn.click(function () {
+                        content.html(contentHtml);
+                        content.removeAttr("contenteditable");
+                        cancelBtn.addClass('d-none');
+                        submitBtn.addClass('d-none');
+                        removeBtn.removeClass('d-none');
+                        modifyBtn.removeClass('d-none');
                     });
                 }
-
-            })
-        </script>
-    </th:block>
+            });
+        })
+    </script>
 </th:block>
+</body>
+</html>

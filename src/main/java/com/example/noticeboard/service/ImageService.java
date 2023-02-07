@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ImageService {
 
-    List<ImageDTO> uploadImg(MultipartFile[] multipartFiles);
-    File getImage(String fileName, String size) throws IOException;
+    List<ImageDTO> uploadImg(MultipartFile[] multipartFiles) throws IOException;
+    File getImage(String fileName) throws IOException;
     boolean removeImg(String ImgName) throws IOException;
 }

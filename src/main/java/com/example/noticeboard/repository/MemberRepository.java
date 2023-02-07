@@ -13,5 +13,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("select m from Member m where m.username = :username and m.fromSocial = :fromSocial")
     public Optional<Member> findByUsername(String username, boolean fromSocial);
 
-    public Optional<Member> findByNameAndEmail(String name, String email);
+    @Query("select m from Member m where m.email = :email and m.fromSocial = :fromSocial")
+    public Optional<Member> findByEmail(String email, boolean fromSocial);
+
+
+    public boolean existsByUsername(String username);
+    public boolean existsByEmail(String email);
+    public boolean existsByUsernameAndEmail(String username, String email);
+    public boolean existsByNameAndEmail(String name, String email);
 }

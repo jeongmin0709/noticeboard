@@ -11,8 +11,6 @@ import java.util.List;
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class Board extends BaseEntity{
 
     @Id
@@ -27,6 +25,10 @@ public class Board extends BaseEntity{
 
     private String title;
 
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Image> imageList = new ArrayList<>();
+
     @Column(columnDefinition = "TEXT")
     private String content;
 
@@ -34,13 +36,31 @@ public class Board extends BaseEntity{
 
     private int viewNum;
 
+    @Builder
+    public Board(Long id, Member member, String title, String content, int recomendNum, int viewNum) {
+        this.id = id;
+        this.member = member;
+        this.title = title;
+        this.content = content;
+        this.recomendNum = recomendNum;
+        this.viewNum = viewNum;
+    }
 
-    public void changeTitle(String title){this.title = title;}
 
-    public void changeContent(String content){this.content = content;}
+    public void setTitle(String title){this.title = title;}
+
+    public void setContent(String content){this.content = content;}
 
     public void addRecommendNum(){ recomendNum++; }
 
     public void addViewNum(){viewNum++;}
+
+    public void addImage(Image image){
+        image.setBoard(this);
+        imageList.add(image);
+    }
+    public void removeImage(){
+        imageList.clear();
+    }
 
 }
