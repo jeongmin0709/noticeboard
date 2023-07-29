@@ -57,6 +57,7 @@
 ## 설계
 ### 1. 기능 명세서
 ### 2. DB 설계
+![erd](https://github.com/jeongmin0709/noticeboard/assets/121369135/beabc99c-c0bb-4ba5-bfe6-bfa64d06a902)
 
     
     
