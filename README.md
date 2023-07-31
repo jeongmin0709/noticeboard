@@ -61,6 +61,9 @@
 <details>
   
 <summary>패키지 구조 보기</summary>   
+
+
+```
 📦src
  ┣ 📂main
  ┃ ┣ 📂java
@@ -250,11 +253,19 @@
  ┃ ┃ ┃ ┃ ┃ ┣ 📜DummyDataProvider.java
  ┃ ┃ ┃ ┃ ┃ ┗ 📜NoticeboardApplicationTests.java
  ┃ ┗ 📂resources
- ┃ ┃ ┗ 📜application.properties  
+ ┃ ┃ ┗ 📜application.properties
+ ```
+
+
 </details>
 <br/>
-### 2. DB 설계
+
+### 2.DB 설계
 ![erd](https://github.com/jeongmin0709/noticeboard/assets/121369135/beabc99c-c0bb-4ba5-bfe6-bfa64d06a902)
+
+### 3.API 설계
+L
+
 
     
     
