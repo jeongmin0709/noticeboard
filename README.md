@@ -265,19 +265,19 @@
 
 ### 3.API 설계
 
-#### 게시글 API
+#### 3.1 게시글 API
 ![게시글api](https://github.com/jeongmin0709/noticeboard/assets/121369135/12851469-d8e9-486f-b471-e4fdd5e43985)
 
-### 댓글 API
+#### 3.2 댓글 API
 ![댓글api](https://github.com/jeongmin0709/noticeboard/assets/121369135/094a5323-b14d-4438-a12c-90016fbae8d1)
 
-### 유저 API
+#### 3.3 유저 API
 ![유저api](https://github.com/jeongmin0709/noticeboard/assets/121369135/61ce14c0-884c-4690-ab30-e6e917f9af4d)
 
-### 이미지 API
+#### 3.4 이미지 API
 ![이미지api](https://github.com/jeongmin0709/noticeboard/assets/121369135/1ae63037-0a52-4148-88a3-be4fd31a570f)
 
-### 알림 API
+#### 3.5 알림 API
 ![알림api](https://github.com/jeongmin0709/noticeboard/assets/121369135/0cc27fd5-42e0-462a-b2ea-92d54bb7b92a)
 
 
