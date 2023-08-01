@@ -9,7 +9,6 @@ import java.net.URLEncoder;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Builder
 public class ImageDTO {
 

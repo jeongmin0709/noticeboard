@@ -1,12 +1,14 @@
 package com.example.noticeboard.service;
 
 
-import org.springframework.data.util.Pair;
+
+import com.example.noticeboard.dto.AuthCodeResultDTO;
 
 import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 public interface EmailService {
     void sendMail(String receiver)throws MessagingException, UnsupportedEncodingException;
-    String getAuthCode(String receiver);
+    AuthCodeResultDTO checkAuthCode(String email, String code);
 }

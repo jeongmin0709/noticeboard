@@ -1,26 +1,28 @@
 package com.example.noticeboard.service;
 
+import com.example.noticeboard.dto.memberdto.ModifyEmailForm;
+import com.example.noticeboard.dto.memberdto.ModifyPasswordForm;
 import com.example.noticeboard.entity.member.Member;
 import com.example.noticeboard.entity.member.Role;
 import com.example.noticeboard.security.dto.MemberDTO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.Errors;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
 public interface MemberService {
 
-    void signUp(MemberDTO memberDTO);
+    String signUp(MemberDTO memberDTO);
     boolean checkUsername(String username);
     boolean checkEmail(String email);
     boolean checkUsernameAndEmail(String username, String email);
-    boolean checkNameAndEmail(String name, String email);
     boolean checkPassword(String username, String password);
-    void modify(MemberDTO memberDTO);
-    String findUsername(String email, String name);
-    String findPassword(String email, String userName);
+    void modifyEmail(ModifyEmailForm modifyEmailForm);
+    void modifyPassword(ModifyPasswordForm modifyPasswordForm);
+    List<Map<String, Object>> findUsername(String email);
+    String findPassword(String userName);
 
     default Member dtoToEntity(MemberDTO memberDTO , PasswordEncoder passwordEncoder){
         Member member = Member.builder()

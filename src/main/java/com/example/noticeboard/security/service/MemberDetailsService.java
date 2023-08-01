@@ -36,12 +36,11 @@ public class MemberDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("chek Email or Social");
         }
         Member member = result.get();
-        log.info("-------------------------------");
-        log.info(member);
 
         // entity to DTO
         MemberDTO memberDTO = MemberDTO.builder()
                 .username(member.getUsername())
+                .name(member.getName())
                 .password(member.getPassword())
                 .email(member.getEmail())
                 .RoleSet(member.getRoleSet())

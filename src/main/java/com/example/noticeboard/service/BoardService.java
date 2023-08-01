@@ -9,22 +9,23 @@ import com.example.noticeboard.security.dto.MemberDTO;
 
 import java.io.IOException;
 
-
 public interface BoardService {
 
-    PageResultDTO<BoardDTO, Object[]> getList(PageRequestDTO pageRequestDTO, MemberDTO memberDTO);
+    PageResultDTO<PagingBoardDTO, Board> getList(PageRequestDTO pageRequestDTO, MemberDTO memberDTO);
 
     Long registerBoard(BoardDTO boardDTO);
 
     BoardDTO getBoard(Long id);
 
-    Integer recommendBoard(Long id);
+    Integer recommendBoard(Long id, MemberDTO recommender);
 
-    Long removeBoard(Long id) throws IOException;
+    void removeBoard(Long id, MemberDTO memberDTO) throws IOException;
 
-    Long modifyBoard(BoardDTO boardDTO);
+    void modifyBoard(BoardDTO boardDTO ,MemberDTO memberDTO);
 
-    default public BoardDTO entityToDto(Board board, Long commentCount){
+    void increaseViewNum(Long id);
+
+    default public BoardDTO entityToDto(Board board){
 
         BoardDTO boardDTO = BoardDTO.builder()
                 .id(board.getId())
@@ -33,7 +34,6 @@ public interface BoardService {
                 .writer(board.getMember().getUsername())
                 .recomendNum(board.getRecomendNum())
                 .viewNum(board.getViewNum())
-                .commentCount(commentCount.intValue())
                 .createDate(board.getCreateDate())
                 .modDate(board.getModDate())
                 .build();
@@ -64,7 +64,7 @@ public interface BoardService {
                 .content(boardDTO.getContent())
                 .build();
 
-        boardDTO.getImageDTOList().stream().forEach(imageDTO -> {
+        boardDTO.getImageDTOList().forEach(imageDTO -> {
             board.addImage(
               Image.builder()
                       .name(imageDTO.getFileName())
@@ -72,8 +72,6 @@ public interface BoardService {
                       .uuid(imageDTO.getUuid())
                       .build());
         });
-
-
         return board;
     }
 }

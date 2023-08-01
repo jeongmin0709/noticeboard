@@ -1,9 +1,16 @@
 package com.example.noticeboard.service;
 
 import com.example.noticeboard.dto.ImageDTO;
-import lombok.extern.log4j.Log4j2;
+import com.example.noticeboard.entity.Board;
+import com.example.noticeboard.entity.Image;
+import com.example.noticeboard.repository.ImageRepository;
+import com.example.noticeboard.service.event.ModifyBoardEvent;
+import com.example.noticeboard.service.event.RemoveBoardEvent;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnailator;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,11 +28,14 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@Log4j2
+@Slf4j
+@RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
 
     @Value("${upload.path}")
     private String uploadPath;
+
+    private final ImageRepository imageRepository;
 
     @Override
     public List<ImageDTO> uploadImg(MultipartFile[] images) throws IOException {
@@ -44,10 +54,11 @@ public class ImageServiceImpl implements ImageService {
             log.info("파일 이름: " + fileName);
                 //원본파일 저장
             uploadImg.transferTo(savePath);
-            //섬네일 생성
+
             String thumbnailSaveName = uploadPath + File.separator + folderPath + File.separator + "s_" + uuid + "_" + fileName;
             File thumbnailFile = new File(thumbnailSaveName);
 
+            //섬네일 생성
             Thumbnailator.createThumbnail(savePath.toFile(), thumbnailFile, 200, 200);
             imageDTOList.add(ImageDTO.builder().fileName(fileName).uuid(uuid).folderPath(folderPath).build());
 
@@ -68,6 +79,18 @@ public class ImageServiceImpl implements ImageService {
         File image = new File(uploadPath+File.separator+srcImgName);
         File thumbnail = new File(image.getParent(), "s_" +image.getName());
         return image.delete() && thumbnail.delete();
+    }
+
+    @EventListener
+    public void removeBoardEventListener(RemoveBoardEvent removeBoardEvent) throws UnsupportedEncodingException{
+        List<Image> imageList = removeBoardEvent.getBoard().getImageList();
+        for(Image image: imageList) removeImg(image.getImageURL());
+    }
+
+    @EventListener
+    public void modifyBoardEventListener(ModifyBoardEvent modifyBoardEvent){
+        Board board = modifyBoardEvent.getBoard();
+        imageRepository.deleteByBoard(board);
     }
 
 

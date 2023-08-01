@@ -27,7 +27,6 @@ public class Member extends BaseEntity {
 
     private String name;
 
-    @Column(unique = true)
     private String email;
 
     @ElementCollection(fetch = FetchType.LAZY)

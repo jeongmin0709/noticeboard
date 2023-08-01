@@ -1,28 +1,34 @@
 package com.example.noticeboard.service;
 
+import com.example.noticeboard.dto.memberdto.ModifyEmailForm;
+import com.example.noticeboard.dto.memberdto.ModifyPasswordForm;
 import com.example.noticeboard.entity.member.Member;
 import com.example.noticeboard.repository.MemberRepository;
 import com.example.noticeboard.security.dto.MemberDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Transactional
+@Slf4j
 public class MemberServiceImpl implements MemberService{
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public void signUp(MemberDTO memberDTO) {
+    public String signUp(MemberDTO memberDTO) {
         Member member = dtoToEntity(memberDTO, passwordEncoder);
         memberRepository.save(member);
+        return member.getUsername();
     }
 
     @Override
@@ -41,41 +47,42 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Override
-    public boolean checkNameAndEmail(String name, String email) {
-        return memberRepository.existsByNameAndEmail(name, email);
-    }
-
-
-    @Override
     public boolean checkPassword(String username, String password) {
         Optional<Member> result = memberRepository.findByUsername(username, false);
-        if(result.isEmpty()) throw new UsernameNotFoundException("계정을 찾을 수 없습니다.");
         Member member = result.get();
         return passwordEncoder.matches(password, member.getPassword());
     }
 
     @Override
-    public void modify(MemberDTO memberDTO) {
-        Optional<Member> result = memberRepository.findByUsername(memberDTO.getUsername(), false);
-        if(result.isEmpty()) throw new UsernameNotFoundException("계정을 찾을 수 없습니다.");
+    public void modifyEmail(ModifyEmailForm modifyEmailForm){
+        Optional<Member> result = memberRepository.findByUsername(modifyEmailForm.getUsername(), false);
         Member member = result.get();
-        member.setEmail(memberDTO.getEmail());
-        member.setPassword(passwordEncoder.encode(memberDTO.getPassword()));
+        member.setEmail(modifyEmailForm.getNewEmail());
     }
 
     @Override
-    public String findUsername(String email, String name) {
-        Optional<Member> result = memberRepository.findByEmail(email, false);
-        if(result.isEmpty()) throw new UsernameNotFoundException("계정을 찾을 수 없습니다.");
+    public void modifyPassword(ModifyPasswordForm modifyPasswordForm){
+        Optional<Member> result = memberRepository.findByUsername(modifyPasswordForm.getUsername(), false);
         Member member = result.get();
-        return member.getUsername();
+        member.setPassword(passwordEncoder.encode(modifyPasswordForm.getNewPassword()));
+    }
+
+    @Override
+    public List<Map<String, Object>> findUsername(String email) {
+        List<Member> memberList = memberRepository.findByEmail(email, false);
+        return memberList.stream().map(member -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("username", member.getUsername());
+            map.put("createDate", member.getCreateDate());
+            return map;
+        }).collect(Collectors.toList());
+
     }
 
 
     @Override
-    public String findPassword(String email, String username) {
-        Optional<Member> result = memberRepository.findByEmail(email, false);
-        if(result.isEmpty()) throw new UsernameNotFoundException("계정을 찾을 수 없습니다.");
+    public String findPassword(String username) {
+        Optional<Member> result = memberRepository.findByUsername(username, false);
         Member member = result.get();
         String tempPassword = makeRandomPassword(12);
         member.setPassword(passwordEncoder.encode(tempPassword));

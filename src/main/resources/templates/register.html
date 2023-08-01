@@ -14,17 +14,19 @@
 <body>
 <th:block th:fragment="content">
     <!--content-->
-    <section class="py-5" id="scroll-target">
+    <section>
         <div class="container px-lg-5">
             <div class="mx-auto" style="max-width: 893px">
-                <div class="row border-bottom border-secondary mb-4 mx-1 border-4">
-                    <div class="col-md px-0 py-md-3 d-flex justify-content-center justify-content-md-start"><h1 th:text="#{title.register}">게시글 등록</h1></div>
+                <div class="row border-bottom border-primary-subtle border-4 mb-4 mx-1 border-4">
+                    <div class="col-md px-0 py-md-3 d-flex justify-content-center justify-content-md-start">
+                        <span class="mb-0 fs-1 fw-bold text-primary">게시글 등록</span>
+                    </div>
                     <div class="col-md d-flex justify-content-end px-0 py-3">
-                        <a class="btn btn-primary" th:href="@{/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword},
-                           order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}"><i class="bi bi-list"></i> 목록가기</a>
+                        <a class="btn btn-primary px-4 py-3" th:href="@{/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword},
+                           order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}"><i class="bi bi-list"></i> 목록</a>
                     </div>
                 </div>
-                <form id="registerForm" th:action="@{/register}" th:method="post" th:object="${boardDTO}">
+                <form id="registerForm" th:action="@{/boards}" th:method="POST">
                     <input type="hidden" name="writer" th:value="${#authentication.name}">
                     <th:block th:object="${pageRequestDTO}">
                         <input type="hidden" th:field="*{page}">
@@ -34,10 +36,10 @@
                         <input type="hidden" th:field="*{my}">
                     </th:block>
                     <div class="form-group mb-3">
-                        <input class="form-control-lg w-100" type="text" th:field="*{title}" placeholder="제목" required>
+                        <input class="form-control-lg w-100" type="text" name="title" placeholder="제목" required>
                     </div>
                     <div class="form-group">
-                        <textarea class="form-control" th:field="*{content}" id="summernote"></textarea>
+                        <textarea class="form-control" name="content" id="summernote"></textarea>
                     </div>
                     <div class="mt-4 p-3 bg-light">
                         <ul class="fs-6">
@@ -53,8 +55,8 @@
                         <input type="file" class="form-control" id="inputFile" multiple>
                     </div>
                     <div class="d-flex justify-content-center mt-5">
-                        <button type="submit" class="btn btn-primary me-3 rounded" id="submitBtn">작성 완료</button>
-                        <a class="btn btn-secondary rounded" th:href="@{/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword},
+                        <button type="submit" class="btn btn-success me-3 px-4 py-3 rounded" id="submitBtn">작성 완료</button>
+                        <a class="btn btn-outline-success px-4 py-3 rounded" th:href="@{/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword},
                                 order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}">취소</a>
                     </div>
                     <div class="box">
@@ -117,8 +119,8 @@
                 let str = "";
                 $(ImageDTOList).each(function (i, ImageDTO) {
                     str += "<div class='col-6 col-sm-4 col-md-3 col-lg-2' data-name='" + ImageDTO.fileName + "' data-path='" + ImageDTO.folderPath + "' data-uuid='" + ImageDTO.uuid + "'>";
-                    str += "    <button data-image_url='" + ImageDTO.imageURL + "' class='btn btn-secondary small imgRemoveBtn' type='button'><i class='bi bi-x-lg w-100 h-100'></i></button>"
-                    str += "    <img data-image_url='" + ImageDTO.imageURL + "' class='img-thumbnail' src='/image?fileName=" + ImageDTO.thumbnailURL + "'>";
+                    str += "    <button data-image_url='" + ImageDTO.imageURL + "' class='btn btn-danger small imgRemoveBtn' type='button'><i class='bi bi-x-lg w-100 h-100'></i></button>"
+                    str += "    <img data-image_url='" + ImageDTO.imageURL + "' class='img-thumbnail' src='/images?fileName=" + ImageDTO.thumbnailURL + "'>";
                     str += "</div>";
                 });
                 thumbnailList.append(str);
@@ -144,7 +146,7 @@
                 }
                 if (!appended) return;
                 $.ajax({
-                    url: '/image',
+                    url: '/images',
                     processData: false,
                     contentType: false,
                     data: formData,
@@ -163,7 +165,7 @@
             // 원본이미지 삽입
             $(".thumbnailList").on("click", "img", function () {
                 let imageURL = $(this).data("image_url");
-                $('#summernote').summernote('insertImage', '/image?fileName=' + imageURL, function ($image) {
+                $('#summernote').summernote('insertImage', '/images?fileName=' + imageURL, function ($image) {
                     $image.addClass('img-fluid');
                 });
             });
@@ -173,12 +175,11 @@
                 let li = $(this).parent();
                 let fileName = $(this).data("image_url");
                 $.ajax({
-                    url: '/image?fileName='+ fileName,
-                    data: {fileName: fileName},
+                    url: '/images?fileName='+ fileName,
                     type: 'delete',
                     success: function () {
                         li.remove();
-                        $("img[src='/image?fileName=" + fileName + "']").remove();
+                        $("img[src='/images?fileName=" + fileName + "']").remove();
                     }
                 });
             });
@@ -192,6 +193,7 @@
                     str += "<input type='hidden' name='imageDTOList[" + i + "].uuid' value='" + target.data('uuid') + "'>";
                 });
                 $(".box").html(str);
+                $("textarea[name='content']").val($('#summernote').summernote('code'));
                 return true;
             });
         });

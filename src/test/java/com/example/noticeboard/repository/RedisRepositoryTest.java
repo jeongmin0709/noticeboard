@@ -6,17 +6,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @SpringBootTest
+@Transactional
 public class RedisRepositoryTest {
 
     @Autowired RedisRepository redisRepository;
 
-    @DisplayName("save")
+    @DisplayName("이메일 인증토큰을 저장한후 조회한다.")
     @Test
-    public void saveTest(){
+    public void saveAndFindTest(){
 
         //given
         EmailAuthToken emailAuthToken = EmailAuthToken.builder()

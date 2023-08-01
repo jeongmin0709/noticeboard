@@ -1,11 +1,13 @@
 package com.example.noticeboard.security.handler;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.validation.BindingResult;
@@ -14,28 +16,32 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URLEncoder;
 
 @Log4j2
+@RequiredArgsConstructor
 public class LoginFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+
     @Override
     public void onAuthenticationFailure(HttpServletRequest request,
                                         HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
-        String error = "";
+        String errorMessage;
         if (exception instanceof BadCredentialsException) {
-            error = "1"; //아이디 또는 비밀번호를 잘못 입력했습니다.
+            errorMessage = "아이디 또는 비밀번호가 맞지 않습니다.\n 다시 확인해 주세요.";
+        } else if (exception instanceof InternalAuthenticationServiceException) {
+            errorMessage = "내부적으로 발생한 시스템 문제로 인해 요청을 처리할 수 없습니다.\n 관리자에게 문의하세요.";
         } else if (exception instanceof UsernameNotFoundException) {
-            error = "2";//아이디 또는 비밀번호를 잘못 입력했습니다.
-        } else if (exception instanceof DisabledException) {
-            error = "3"; //이메일 인증을 해주세요.
-        } else if (exception instanceof SessionAuthenticationException) {
-            error = "4";//중복 로그인입니다.
+            errorMessage = "계정이 존재하지 않습니다.\n 회원가입 진행 후 로그인 해주세요.";
+        } else if (exception instanceof AuthenticationCredentialsNotFoundException) {
+            errorMessage = "인증 요청이 거부되었습니다.\n 관리자에게 문의하세요.";
+        } else {
+            errorMessage = "알 수 없는 이유로 로그인에 실패하였습니다.\n 관리자에게 문의하세요.";
         }
-        log.info("로그인 요청 실패!");
-        // 로그인 페이지 다시요청
-        setDefaultFailureUrl("/login?error="+error);
-        super.onAuthenticationFailure(request,response,exception);
+        setDefaultFailureUrl("/loginForm");
+        request.getSession().setAttribute("errorMessage", errorMessage);
+        super.onAuthenticationFailure(request, response, exception);
     }
 }

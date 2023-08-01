@@ -34,5 +34,13 @@ public class BoardDTO {
 
     private int commentCount;
 
+    private Long prevId;
+
+    private String prevTitle;
+
+    private Long nextId;
+
+    private String nextTitle;
+
 
 }

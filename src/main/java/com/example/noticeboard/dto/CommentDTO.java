@@ -19,13 +19,13 @@ public class CommentDTO {
 
     private Long parentId;
 
+    private Integer childCount;
+
     private String writer;
 
-    @Builder.Default
-    @ToString.Exclude
-    private List<CommentDTO> childList = new ArrayList<>();
-
     private String content;
+
+    private String receiver;
 
     private int recommendNum;
 

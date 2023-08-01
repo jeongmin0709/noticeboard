@@ -1,20 +1,30 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="setContent(title, link, content)">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:fragment="setContent(title, link, content)">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    <title th:replace="${title}">Notice Board Loyout</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>New Age - Start Bootstrap Theme</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/assets/favicon.ico}" />
+    <!-- Bootstrap icons-->
+    <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css}" rel="stylesheet" />
+    <!-- Google fonts-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbit&display=swap" rel="stylesheet">
 
-    <link rel="icon" type="image/x-icon" th:href="@{/assets/favicon.ico}"/>
-    <script th:src="@{https://use.fontawesome.com/releases/v6.1.0/js/all.js}" crossorigin="anonymous"></script>
-    <link rel="stylesheet" th:href="@{https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css}">
-    <!-- bootstrap JS-->
-    <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js}"></script>
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/css/newStyles.css?after}" rel="stylesheet" />
+    <!-- Bootstrap core JS-->
+    <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js}"></script>
     <!-- Core theme JS-->
     <script th:src="@{/js/scripts.js}"></script>
-    <!-- Core theme css-->
-    <link th:href="@{/css/styles.css}" rel="stylesheet">
-    <!-- jquery js-->
+    <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+    <!-- * *                               SB Forms JS                               * *-->
+    <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
+    <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
     <script th:src="@{https://code.jquery.com/jquery-3.6.3.js}"
             integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
 
@@ -22,82 +32,195 @@
 
     </th:block>
 </head>
-<body>
+<body id="page-top">
 <!-- Navigation-->
-<nav class="navbar navbar-expand-lg navbar-light" id="mainNav">
-    <div class="container px-lg-5">
-        <a class="navbar-brand" th:href="@{/list}">notice board</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
-                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-            Menu
-            <i class="fas fa-bars"></i>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-            <ul class="navbar-nav ms-auto py-4 py-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link px-lg-3 py-3 py-lg-4" th:href="@{/list}">home</a>
-                </li>
-                <th:block th:if="${#authorization.expr('isAuthenticated()')}">
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" th:href="@{/logout}">로그아웃</a></li>
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4 text-lowercase" th:href="@{/userInfo}">[[${#authentication.name}]]
-                        님</a></li>
-                </th:block>
-                <th:block th:unless="${#authorization.expr('isAuthenticated()')}">
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" th:href="@{/login}">로그인</a></li>
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" th:href="@{/signup}">회원가입</a></li>
-                </th:block>
-            </ul>
-        </div>
-    </div>
-</nav>
-<!-- Page Header-->
-<header class="masthead" style="background-image: url('/assets/img/about-bg.jpg')">
-    <div class="container position-relative px-4 px-lg-5">
-        <div class="row gx-4 gx-lg-5 justify-content-center">
-            <div class="col-md-10 col-lg-8 col-xl-7">
-                <div class="page-heading">
-                    <h1>Notice Board</h1>
+<nav class="navbar navbar-expand-lg navbar-light py-lg-4 fixed-top shadow-sm" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/list}"><img th:src="@{/assets/img/logo.png}" class="img-fluid" style="height: 50px"></a>
+        <th:block th:unless="${#authorization.expr('isAuthenticated()')}">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                메뉴
+                <i class="bi-list"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ms-auto my-3 my-lg-0">
+                    <li class="nav-item mb-2 mb-lg-0"><a class="nav-link me-lg-3" th:href="@{/loginForm}">로그인</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/signup}">회원가입</a></li>
+                </ul>
+            </div>
+        </th:block>
+        <div class="d-flex" th:if="${#authorization.expr('isAuthenticated()')}">
+            <div class="dropdown me-3">
+                <button class="btn btn-light rounded-circle" id="member-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person fw-bold fs-5"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end member-list">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-1">
+                            <div class="d-flex justify-content-center mb-2">
+                                <img th:src="@{/assets/img/member.png}" class="rounded-circle mx-auto" style="width: 80px; height: 80px">
+                            </div>
+                            <div class="d-flex justify-content-center mb-1">
+                                <span>[[${#authentication.principal.username}]] 님</span>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <span class="opacity-75" style="font-size: 0.8em">일반 유저</span>
+                            </div>
+                        </li>
+                        <li class="list-group-item list-group-item-action d-flex justify-content-center" onclick="location.href='/userInfo'">회원 정보</li>
+                        <li class="list-group-item list-group-item-action d-flex justify-content-center" onclick="location.href='/logout'">로그 아웃</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="dropdown me-3 me-lg-2">
+                <button class="btn btn-light rounded-circle" id="notification-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-bell fw-bold fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger not-read-count">
+                    </span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end overflow-auto notification-list">
+                    <div class="px-3">알림</div>
+                    <ul class="list-group list-group-flush" id="notification-list">
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
-</header>
+</nav>
+<div class="position-fixed bottom-0 end-0 mb-4 me-4 toast" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 1060">
+    <div class="toast-header">
+        <strong class="me-auto">알림</strong>
+        <small class="toast-time">11 mins ago</small>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+        Hello, world! This is a toast message.
+    </div>
+</div>
+<script th:inline="javascript">
+    $(document).ready(function () {
+        let page = 1;
+        let hasNext = true;
+        let notReadCount = 0;
+        let notificationListUL = $("#notification-list");
+        let hasNewNotification = true;
+
+        let message = [[${message}]];
+        if(message) showToast(message, null);
+
+        if ([[${#authorization.expr('isAuthenticated()')}]] == true) {
+            <!-- 서버로 알림 구독요청 -->
+            let eventSource = new EventSource('/notification/subscribe');
+
+            <!-- 알림 구독이 되면 작동하는 리스너 -->
+            eventSource.addEventListener('connect', function(e) {
+                let sliceResultDTO = JSON.parse(e.data)
+                console.log(sliceResultDTO)
+                hasNext = sliceResultDTO.hasNext;
+                page +=1;
+                let str = "";
+                $.each(sliceResultDTO.dtoList, function (idx, notificationDTO) {
+                    if(!notificationDTO.read) notReadCount++;
+                    str += addNotification(notificationDTO);
+                });
+                $('.not-read-count').text(notReadCount);
+                if(notReadCount == 0){
+                    $('.not-read-count').addClass("d-none");
+                    hasNewNotification = false;
+                }
+                notificationListUL.append(str);
+            }, false);
+
+            <!-- 알림이 발생하면 작동하는 리스너 -->
+            eventSource.addEventListener('message', function(e) {
+                notReadCount +=1;
+                hasNewNotification = true;
+                let notificationDTO = JSON.parse(e.data)
+                let str = addNotification(notificationDTO);
+                $('.not-read-count').text(notReadCount);
+                $('.not-read-count').removeClass("d-none");
+                notificationListUL.prepend(str);
+                showToast(notificationDTO.content, notificationDTO.createDate)
+            }, false);
+
+            eventSource.onerror = error => {
+                eventSource.close();
+            };
+
+            <!-- 알림 무한 스크롤 함수 -->
+            $(".notification-list").scroll(function() {
+                let height = $("#notification-list").height()-$(".notification-list").height()-$(".notification-list").children("div").height()-50;
+                if($(this).scrollTop() >= height && hasNext){
+                    $.ajax({
+                        url: "/notification/list",
+                        type: "get",
+                        data: {page: page, size: 20},
+                        success: function (sliceResultDTO) {
+                            hasNext = sliceResultDTO.hasNext;
+                            page += 1;
+                            let str ="";
+                            $.each(sliceResultDTO.dtoList, function (idx, notificaitonDTO) {
+                                str += addNotification(notificaitonDTO);
+                            });
+                            $("#notification-list").append(str);
+                        }
+                    });
+                }
+            });
+
+            <!-- 알림 버튼을 클릭하면 읽지 않은 알림을 읽음 처리하는 함수 -->
+            $("#notification-btn").click(function(){
+                if(!hasNewNotification) return;
+                let idList = new Array();
+                $("#notification-list").children().each(function () {idList.push($(this).data("id"));})
+                $.ajax({
+                    url: "/notification/read",
+                    type: "patch",
+                    data: JSON.stringify(idList),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function () {
+                        notReadCount = 0;
+                        hasNewNotification = false;
+                        $(".not-read-count").addClass("d-none");
+                    }
+                })
+            });
+        }
+
+        <!-- 알림을 추가하는 함수 -->
+        function addNotification(notification){
+            let str = "";
+            str += "<li class='list-group-item list-group-item-action' data-id='"+notification.id+"' onclick='location.href=\""+notification.url+"\"'>"
+            str += "    <div class='notification-content text-break mb-1'>" + notification.content + "</div>"
+            str += "    <div class='notification-time text-break opacity-75' style='font-size: 0.8em'>" + timeForToday(notification.createDate) + "</div>"
+            str += "</li>"
+            return str;
+        }
+
+        function showToast(message, time){
+            let toast = $('.toast');
+            toast.children('.toast-body').text(message);
+            toast.find('.toast-time').text(timeForToday(time));
+            toast.toast('show');
+        }
+
+
+    });
+</script>
 <!-- Main Content-->
-<main class="mb-4" th:insert="${content}">
+<main th:insert="${content}" style="margin-top: 92px">
 </main>
+
 <!-- Footer-->
-<footer class="border-top">
-    <div class="container px-4 px-lg-5">
-        <div class="row gx-4 gx-lg-5 justify-content-center">
-            <div class="col-md-10 col-lg-8 col-xl-7">
-                <ul class="list-inline text-center">
-                    <li class="list-inline-item">
-                        <a href="#!">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fas fa-circle fa-stack-2x"></i>
-                                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
-                                </span>
-                        </a>
-                    </li>
-                    <li class="list-inline-item">
-                        <a href="#!">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fas fa-circle fa-stack-2x"></i>
-                                    <i class="fab fa-facebook-f fa-stack-1x fa-inverse"></i>
-                                </span>
-                        </a>
-                    </li>
-                    <li class="list-inline-item">
-                        <a href="#!">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fas fa-circle fa-stack-2x"></i>
-                                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
-                                </span>
-                        </a>
-                    </li>
-                </ul>
-                <div class="small text-center text-muted fst-italic">Copyright &copy; Your Website 2022</div>
-            </div>
+<footer class="bg-black text-center py-5">
+    <div class="container px-5">
+        <div class="text-white-50 small">
+            <div class="mb-2">&copy; Your Website 2023. All Rights Reserved.</div>
+            <a href="#!">Privacy</a>
+            <span class="mx-1">&middot;</span>
+            <a href="#!">Terms</a>
+            <span class="mx-1">&middot;</span>
+            <a href="#!">FAQ</a>
         </div>
     </div>
 </footer>

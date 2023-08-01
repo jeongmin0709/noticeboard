@@ -11,15 +11,19 @@ import java.util.List;
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(indexes = // 인덱스를 통해 검색속도 향상
+        {
+                @Index(name = "idx_order", columnList = "board_id, viewNum, recomendNum")
+})
 public class Board extends BaseEntity{
 
     @Id
-    @Column(name = "BOARD_ID")
+    @Column(name = "board_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MEMBER_ID", nullable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     @ToString.Exclude
     private Member member;
 

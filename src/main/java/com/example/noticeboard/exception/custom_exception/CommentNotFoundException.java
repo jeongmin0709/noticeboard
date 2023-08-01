@@ -1,15 +1,9 @@
 package com.example.noticeboard.exception.custom_exception;
 
-public class CommentNotFoundException extends RuntimeException{
-    public CommentNotFoundException() {
-        super();
-    }
+import com.example.noticeboard.exception.ErrorCode;
 
-    public CommentNotFoundException(String message) {
-        super(message);
-    }
-
-    public CommentNotFoundException(String message, Throwable cause) {
-        super(message, cause);
+public class CommentNotFoundException extends CustomException{
+    public CommentNotFoundException(ErrorCode errorCode) {
+        super(errorCode);
     }
 }

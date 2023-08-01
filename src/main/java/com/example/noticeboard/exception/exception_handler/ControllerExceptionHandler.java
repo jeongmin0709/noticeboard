@@ -1,22 +1,25 @@
 package com.example.noticeboard.exception.exception_handler;
 
-import com.example.noticeboard.exception.custom_exception.BoardNotFoundException;
+import com.example.noticeboard.controller.BoardController;
+import com.example.noticeboard.controller.MemberController;
+import com.example.noticeboard.exception.custom_exception.AccessDeniedException;
+import com.example.noticeboard.exception.custom_exception.BoardNotfoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @Slf4j
-@ControllerAdvice(annotations = Controller.class)
+@ControllerAdvice(assignableTypes = {BoardController.class, MemberController.class})
 public class ControllerExceptionHandler {
 
-    @ExceptionHandler({BoardNotFoundException.class, UsernameNotFoundException.class})
-    public String notFoundExHandler(Exception exception){
-        String message = exception.getMessage();
-        StackTraceElement[] stackTrace = exception.getStackTrace();
-        log.error("{} : {}",stackTrace[0].toString(), message);
+    @ExceptionHandler
+    public String BoardNotFoundExHandler(BoardNotfoundException exception){
+        log.warn(exception.getErrorCode().getMessage());
         return "/error/404";
     }
-
+    @ExceptionHandler
+    public String AccessDeniedExHandler(AccessDeniedException exception){
+        log.warn(exception.getErrorCode().getMessage());
+        return "/error/403";
+    }
 }

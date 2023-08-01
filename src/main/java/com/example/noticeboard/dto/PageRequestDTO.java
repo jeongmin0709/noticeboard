@@ -24,8 +24,7 @@ public class PageRequestDTO {
         this.size = 20;
     }
 
-    public Pageable getPageable()
-    {
+    public Pageable getPageable() {
         return (StringUtils.hasText(order))?
                 PageRequest.of(page-1, size, Sort.by(order).descending().and(Sort.by("id").descending()))
                 :PageRequest.of(page-1, size, Sort.by("id").descending());

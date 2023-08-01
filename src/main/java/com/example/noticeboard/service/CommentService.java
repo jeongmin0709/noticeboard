@@ -1,58 +1,54 @@
 package com.example.noticeboard.service;
 
 import com.example.noticeboard.dto.CommentDTO;
+import com.example.noticeboard.dto.SliceRequestDTO;
+import com.example.noticeboard.dto.SliceResultDTO;
 import com.example.noticeboard.entity.Board;
 import com.example.noticeboard.entity.Comment;
 import com.example.noticeboard.entity.member.Member;
+import com.example.noticeboard.security.dto.MemberDTO;
+import com.example.noticeboard.service.event.RemoveBoardEvent;
 
 import java.util.List;
 
 public interface CommentService {
 
-    List<CommentDTO> getCommentList(Long boardId, String order);
+    SliceResultDTO getCommentList(Long boardId, SliceRequestDTO sliceRequestDTO);
 
-    int recommend(Long commentId);
+    SliceResultDTO getChildCommentList(Long commentId, SliceRequestDTO sliceRequestDTO);
 
-    Long modify(CommentDTO commentDTO);
+    Integer recommend(Long commentId, MemberDTO recommender);
 
-    Long remove(Long commentId);
+    Long modify(CommentDTO commentDTO, MemberDTO memberDTO);
 
-    Long register(CommentDTO commentDTO);
+    Long remove(Long commentId, MemberDTO memberDTO);
 
-    default CommentDTO entityToDto(Comment comment){
+    CommentDTO register(CommentDTO commentDTO);
+
+
+    default CommentDTO entityToDto(Comment comment, Long childCount){
 
         CommentDTO commentDTO = CommentDTO.builder()
                 .id(comment.getId())
                 .writer(comment.getMember().getUsername())
-                .parentId(comment.getId())
+                .boardId(comment.getBoard().getId())
+                .parentId(comment.getParent() == null?null: comment.getParent().getId())
+                .childCount(childCount.intValue())
                 .content(comment.getContent())
                 .recommendNum(comment.getRecomendNum())
                 .createDate(comment.getCreateDate())
                 .modDate(comment.getModDate())
                 .build();
-
-        List<CommentDTO> childList = commentDTO.getChildList();
-        comment.getChildList().stream().forEach(child -> {
-            CommentDTO childDTO = CommentDTO.builder()
-                    .id(child.getId())
-                    .writer(child.getMember().getUsername())
-                    .parentId(comment.getId())
-                    .content(child.getContent())
-                    .recommendNum(child.getRecomendNum())
-                    .createDate(child.getCreateDate())
-                    .modDate(child.getModDate())
-                    .build();
-            childList.add(childDTO);
-        });
         return commentDTO;
     }
+
 
     default Comment dtoToEntity(CommentDTO commentDTO){
 
         Member member = Member.builder().username(commentDTO.getWriter()).build();
         Board board = Board.builder().id(commentDTO.getBoardId()).build();
         Comment parent = null;
-        if(!(commentDTO.getParentId() == null)) parent = Comment.builder().id(commentDTO.getParentId()).build();
+        if(commentDTO.getParentId() != null) parent = Comment.builder().id(commentDTO.getParentId()).build();
         return Comment.builder()
                 .id(commentDTO.getId())
                 .board(board)

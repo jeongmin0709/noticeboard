@@ -3,6 +3,8 @@ package com.example.noticeboard.controller;
 import com.example.noticeboard.dto.BoardDTO;
 import com.example.noticeboard.dto.PageRequestDTO;
 import com.example.noticeboard.dto.PageResultDTO;
+import com.example.noticeboard.dto.PagingBoardDTO;
+import com.example.noticeboard.entity.Board;
 import com.example.noticeboard.security.dto.MemberDTO;
 import com.example.noticeboard.service.BoardService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Controller
@@ -25,31 +30,55 @@ public class BoardController {
     private final BoardService boardService;
 
     @GetMapping("/")
+    @PreAuthorize("permitAll()")
     public String layout(){
         return "redirect:/list";
     }
 
-    @PreAuthorize("permitAll()")
     @GetMapping("/list")
+    @PreAuthorize("permitAll()")
     public String list(PageRequestDTO pageRequestDTO, @AuthenticationPrincipal MemberDTO memberDTO, Model model){
-        log.info("게시글 목록 요청");
-        PageResultDTO<BoardDTO, Object[]> pageResultDTO = boardService.getList(pageRequestDTO, memberDTO);
+        log.info("게시글 목록 화면 요청");
+        PageResultDTO<PagingBoardDTO, Board> pageResultDTO = boardService.getList(pageRequestDTO, memberDTO);
         model.addAttribute("result", pageResultDTO);
         return "/list";
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/register")
+    @PreAuthorize("isAuthenticated()")
     public String registerFrom(PageRequestDTO pageRequestDTO, Model model) {
         log.info("게시글 등록 화면 요청");
-        model.addAttribute("boardDTO", new BoardDTO());
         model.addAttribute("pageRequestDTO", pageRequestDTO);
         return "/register";
     }
 
+    @GetMapping("/read/{id}")
+    @PreAuthorize("permitAll()")
+    public String read(@PathVariable Long id,
+                       PageRequestDTO pageRequestDTO,
+                       HttpServletRequest request,
+                       HttpServletResponse response,
+                       Model model){
+        log.info("{}번 게시글 화면 요청", id);
+        BoardDTO boardDTO = boardService.getBoard(id);
+        increaseViewNum(id, request, response);
+        model.addAttribute("boardDTO", boardDTO);
+        return "/read";
+    }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/register")
+    @GetMapping("/modify/{id}")
+    @PostAuthorize("isAuthenticated() and #model[boardDTO].writer == principal.username") //요청한 클라이언트가 게시글 작성자인지 클라이언트에 응답하기 직전에 권한검사
+    public String modify(@PathVariable Long id, PageRequestDTO pageRequestDTO ,Model model){
+        log.info("{}번 게시글 수정 페이지 요청", id);
+        BoardDTO boardDTO = boardService.getBoard(id);
+        model.addAttribute("boardDTO", boardDTO);
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
+        return "/modify";
+    }
+
+
+    @PostMapping("/boards")
+    @PreAuthorize("isAuthenticated()")
     public String register(BoardDTO boardDTO, PageRequestDTO pageRequestDTO,RedirectAttributes redirectAttributes){
         log.info("게시글 등록 요청");
         Long boardId = boardService.registerBoard(boardDTO);
@@ -62,59 +91,68 @@ public class BoardController {
         return"redirect:/list";
     }
 
-    @PreAuthorize("permitAll()")
-    @GetMapping("/read/{id}")
-    public String read(@PathVariable Long id, PageRequestDTO pageRequestDTO ,Model model){
-        log.info("{}번 게시글 요청", id);
-        BoardDTO boardDTO = boardService.getBoard(id);
-        model.addAttribute("boardDTO", boardDTO);
-        return "/read";
-    }
-
-    @PreAuthorize("isAuthenticated() and #writer == principal.username")
-    @PostMapping("/remove/{id}")
-    public String remove(@PathVariable Long id, String writer, PageRequestDTO pageRequestDTO, RedirectAttributes redirectAttributes) throws IOException {
+    @DeleteMapping("/boards/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public String remove(@PathVariable Long id,
+                         @AuthenticationPrincipal MemberDTO memberDTO,
+                         PageRequestDTO pageRequestDTO,
+                         RedirectAttributes redirectAttributes) throws IOException {
         log.info("{}번 게시글 삭제 요청", id);
-        Long boardId = boardService.removeBoard(id);
+        boardService.removeBoard(id , memberDTO);
         redirectAttributes.addAttribute("page", pageRequestDTO.getPage());
         redirectAttributes.addAttribute("type", pageRequestDTO.getType());
         redirectAttributes.addAttribute("keyword", pageRequestDTO.getKeyword());
         redirectAttributes.addAttribute("order", pageRequestDTO.getOrder());
         redirectAttributes.addAttribute("my", pageRequestDTO.getMy());
-        redirectAttributes.addFlashAttribute("msg", boardId+"번 글이 삭제되었습니다.");
+        redirectAttributes.addFlashAttribute("message", id+"번 글이 삭제되었습니다.");
         return "redirect:/list";
     }
 
-    @PostAuthorize("isAuthenticated() and #model[boardDTO].writer == principal.username")
-    @GetMapping("/modify/{id}")
-    public String modify(@PathVariable Long id, PageRequestDTO pageRequestDTO ,Model model){
-        log.info("{}번 게시글 수정 페이지 요청", id);
-        BoardDTO boardDTO = boardService.getBoard(id);
-        model.addAttribute("boardDTO", boardDTO);
-        model.addAttribute("pageRequestDTO", pageRequestDTO);
-        return "/modify";
-    }
 
-    @PreAuthorize("isAuthenticated() and #boardDTO.getWriter() == principal.username")
-    @PostMapping("/modify")
-    public String modify(BoardDTO boardDTO, PageRequestDTO pageRequestDTO, RedirectAttributes redirectAttributes){
+    @PutMapping("/boards/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public String modify(BoardDTO boardDTO,
+                         PageRequestDTO pageRequestDTO,
+                         @AuthenticationPrincipal MemberDTO memberDTO,
+                         RedirectAttributes redirectAttributes){
         log.info("{}번 게시글 수정 요청", boardDTO.getId());
-        Long boardId = boardService.modifyBoard(boardDTO);
+        boardService.modifyBoard(boardDTO, memberDTO);
         redirectAttributes.addAttribute("page", pageRequestDTO.getPage());
         redirectAttributes.addAttribute("type", pageRequestDTO.getType());
         redirectAttributes.addAttribute("keyword", pageRequestDTO.getKeyword());
         redirectAttributes.addAttribute("order", pageRequestDTO.getOrder());
         redirectAttributes.addAttribute("my", pageRequestDTO.getMy());
-        redirectAttributes.addFlashAttribute("msg", boardId+"번 글이 수정되었습니다.");
+        redirectAttributes.addFlashAttribute("msg", boardDTO.getId()+"번 글이 수정되었습니다.");
         return "redirect:/read/"+boardDTO.getId();
     }
 
-    @PreAuthorize("isAuthenticated() and #writer != principal.username")
-    @PatchMapping("/recomend/{id}/{writer}")
-    @ResponseBody
-    public Integer recommend(@PathVariable Long id, @PathVariable String writer){
-        log.info("{}번 게시글 추천 요청", id);
-        Integer recommendNum = boardService.recommendBoard(id);
-        return recommendNum;
+    // 조회수 중복 방지 함수(쿠키 사용)
+    private void increaseViewNum(Long id,HttpServletRequest request, HttpServletResponse response){
+        Cookie oldCookie = null;
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) { // 쿠기가 null이아니라면
+            for (Cookie cookie : cookies) { //boardView라는 쿠키가 있는지 검사
+                if (cookie.getName().equals("boardView")) {
+                    oldCookie = cookie;
+                }
+            }
+        }
+        if (oldCookie != null) { //boardView 라는 쿠키가 존재한다면
+            if (!oldCookie.getValue().contains("[" + id.toString() + "]")) { // boardView 쿠키의 값이 조회한 게시글 아이디라면
+                boardService.increaseViewNum(id);
+                oldCookie.setValue(oldCookie.getValue() + "_[" + id + "]");
+                oldCookie.setPath("/");
+                oldCookie.setMaxAge(60 * 60 * 24);
+                response.addCookie(oldCookie);
+            }
+        } else { // boardView 라는 쿠키가 존재하지 않는다면
+            boardService.increaseViewNum(id);
+            Cookie newCookie = new Cookie("boardView","[" + id + "]");
+            newCookie.setPath("/");
+            newCookie.setMaxAge(60 * 60 * 24);
+            response.addCookie(newCookie);
+        }
     }
+
 }

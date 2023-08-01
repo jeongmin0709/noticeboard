@@ -27,11 +27,6 @@ public class Comment extends BaseEntity{
     @ToString.Exclude
     private Comment parent;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    @ToString.Exclude
-    @Builder.Default
-    private List<Comment> childList = new ArrayList<>();
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "BOARD_ID", nullable = false)
@@ -51,12 +46,7 @@ public class Comment extends BaseEntity{
 
     public void setParent(Comment comment){
         this.parent = comment;
-        comment.addChild(this);
     }
     public void changeContent(String content){this.content = content;}
     public void addRecomendNum(){recomendNum++;}
-    public void addChild(Comment comment){
-        comment.setParent(this);
-        childList.add(comment);
-    }
 }

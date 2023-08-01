@@ -21,20 +21,20 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/image")
+@RequestMapping("/images")
 public class ImageRestController {
 
     private final ImageService imageService;
 
-    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public List<ImageDTO> uploadImage(MultipartFile[] images) throws IOException {
         log.info("이미지 업로드 요청");
         return imageService.uploadImg(images);
     }
 
-    @PreAuthorize("permitAll()")
     @GetMapping
+    @PreAuthorize("permitAll()")
     public ResponseEntity<byte[]> getImage(String fileName) throws IOException{
         log.info("{} 이미지 요청", fileName);
         File image = imageService.getImage(fileName);
@@ -44,8 +44,8 @@ public class ImageRestController {
         return new ResponseEntity<>(FileCopyUtils.copyToByteArray(image), header, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping
+    @PreAuthorize("isAuthenticated()")
     Boolean removeImage(String fileName) throws IOException{
         log.info("{} 이미지 삭제 요청", fileName);
         return imageService.removeImg(fileName);

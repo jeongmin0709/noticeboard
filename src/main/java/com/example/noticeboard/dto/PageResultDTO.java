@@ -1,9 +1,12 @@
 package com.example.noticeboard.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
 import java.util.List;
 import java.util.function.Function;
@@ -11,9 +14,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Data
-@ToString(exclude = "dtoList")
+@AllArgsConstructor
+@Builder
 public class PageResultDTO<DTO, EN> {
     //DTO리스트
+    @ToString.Exclude
     private List<DTO> dtoList;
     //총 페이지 번호
     private int totalPage;
@@ -27,11 +32,13 @@ public class PageResultDTO<DTO, EN> {
     private boolean prev, next;
     //페이지 번호 목록
     private List<Integer> pageList;
-    public PageResultDTO(Page<EN> result, Function<EN, DTO> fn){
-        dtoList = result.stream().map(fn).collect(Collectors.toList());
+
+    public PageResultDTO(Page<DTO> result){
+        dtoList = result.stream().collect(Collectors.toList());
         totalPage = result.getTotalPages();
         makePageList(result.getPageable());
     }
+
     private void makePageList(Pageable pageable){
         this.page = pageable.getPageNumber()+1; // 0부터 시작하기떄문에 1더함
         this.size = pageable.getPageSize();

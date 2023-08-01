@@ -17,14 +17,16 @@
     <section class="py-5" id="scroll-target">
         <div class="container px-lg-5">
             <div class="mx-auto" style="max-width: 893px">
-                <div class="row border-bottom border-secondary mb-4 mx-1 border-4">
-                    <div class="col-md px-0 py-md-3 d-flex justify-content-center justify-content-md-start"><h1 th:text="#{title.modify}">게시글 수정</h1></div>
+                <div class="row border-bottom border-primary-subtle border-4 mb-4 mx-1 border-4">
+                    <div class="col-md px-0 py-md-3 d-flex justify-content-center justify-content-md-start">
+                        <span class="mb-0 fs-1 fw-bold text-primary">게시글 수정</span>
+                    </div>
                     <div class="col-md d-flex justify-content-end px-0 py-3">
-                        <a class="btn btn-primary" th:href="@{/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword},
+                        <a class="btn px-4 py-3 rounded btn-primary" th:href="@{/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword},
                                 order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}"><i class="bi bi-list"></i>&nbsp<span th:text="#{link.list}"></span></a>
                     </div>
                 </div>
-                <form id="modifyForm" th:object="${boardDTO}" th:action="@{/modify}" th:method="post">
+                <form id="modifyForm" th:object="${boardDTO}" th:action="@{/boards/{id}(id=${boardDTO.id})}" th:method="PUT">
                     <input type="hidden" th:field="*{id}">
                     <input type="hidden" th:field="*{writer}">
                     <th:block th:object="${pageRequestDTO}">
@@ -50,8 +52,8 @@
                         <div class="row thumbnailList">
                             <th:block th:each="imageDTO : *{imageDTOList}">
                                 <div class='col-6 col-sm-4 col-md-3 col-lg-2' th:data-name="${imageDTO.fileName}" th:data-path="${imageDTO.folderPath}" th:data-uuid="${imageDTO.uuid}">
-                                    <button class='btn btn-secondary small imgRemoveBtn' type='button'><i class='bi bi-x-lg w-100 h-100'></i></button>
-                                    <img th:data-image_url="${imageDTO.imageURL}" class="img-thumbnail" th:src="|/image?fileName=${imageDTO.thumbnailURL}|">
+                                    <button class='btn btn-danger small imgRemoveBtn' type='button'><i class='bi bi-x-lg w-100 h-100'></i></button>
+                                    <img th:data-image_url="${imageDTO.imageURL}" class="img-thumbnail" th:src="|/images?fileName=${imageDTO.thumbnailURL}|">
                                 </div>
                             </th:block>
                         </div>
@@ -60,8 +62,8 @@
                         <input type="file" class="form-control" id="inputFile" multiple>
                     </div>
                     <div class="d-flex justify-content-center mt-5">
-                        <button type="submit" class="btn btn-primary me-3 rounded" id="modifyBtn" th:text="#{button.modify.complete}">수정 완료</button>
-                        <a class="btn btn-secondary rounded" th:href="@{/read(id=${boardDTO.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type},
+                        <button type="submit" class="btn btn-success me-3 px-4 py-3 rounded" id="modifyBtn" th:text="#{button.modify.complete}">수정 완료</button>
+                        <a class="btn btn-outline-success px-4 py-3 rounded" th:href="@{/read(id=${boardDTO.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type},
                                 keyword=${pageRequestDTO.keyword}, order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}" th:text="#{link.cancel}">취소</a>
                     </div>
                     <div class="box">
@@ -123,8 +125,8 @@
                 let str = "";
                 $(ImageDTOList).each(function (i, ImageDTO) {
                     str += "<div class='col-6 col-sm-4 col-md-3 col-lg-2' data-name='" + ImageDTO.fileName + "' data-path='" + ImageDTO.folderPath + "' data-uuid='" + ImageDTO.uuid + "'>";
-                    str += "    <button class='btn btn-secondary small imgRemoveBtn' type='button'><i class='bi bi-x-lg w-100 h-100'></i></button>"
-                    str += "    <img data-image_url='" + ImageDTO.imageURL + "' class='img-thumbnail' src='/image?fileName=" + ImageDTO.thumbnailURL + "'>";
+                    str += "    <button class='btn btn-danger small imgRemoveBtn' type='button'><i class='bi bi-x-lg w-100 h-100'></i></button>"
+                    str += "    <img data-image_url='" + ImageDTO.imageURL + "' class='img-thumbnail' src='/images?fileName=" + ImageDTO.thumbnailURL + "'>";
                     str += "</div>";
                 });
                 thumbnailList.append(str);
@@ -150,7 +152,7 @@
                 }
                 if (!appended) return;
                 $.ajax({
-                    url: '/image',
+                    url: '/images',
                     processData: false,
                     contentType: false,
                     data: formData,
@@ -169,7 +171,7 @@
             // 원본이미지 삽입
             $(".thumbnailList").on("click", "img", function () {
                 let imageURL = $(this).data("image_url");
-                $('#summernote').summernote('insertImage', '/image?fileName=' + imageURL, function ($image) {
+                $('#summernote').summernote('insertImage', '/images?fileName=' + imageURL, function ($image) {
                     $image.addClass('img-fluid');
                 });
             });
@@ -179,11 +181,11 @@
                 let li = $(this).parent();
                 let fileName = $(this).next().data("image_url");
                 $.ajax({
-                    url: '/image/'+fileName,
+                    url: '/images?fileName='+ fileName,
                     type: 'delete',
                     success: function () {
                         li.remove();
-                        $("img[src ='/image?fileName=" + fileName + "']").remove();
+                        $("img[src ='/images?fileName=" + fileName + "']").remove();
                     }
                 });
             });
