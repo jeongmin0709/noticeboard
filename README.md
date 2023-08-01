@@ -280,7 +280,9 @@
 #### 3.5 알림 API
 ![알림api](https://github.com/jeongmin0709/noticeboard/assets/121369135/0cc27fd5-42e0-462a-b2ea-92d54bb7b92a)
 
-
+## 기능 설명
+### 1. 게시글
+#### 1.1 CRUD
 
     
     
