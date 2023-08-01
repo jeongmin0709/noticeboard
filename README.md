@@ -265,7 +265,7 @@
 
 ### 3.API 설계
 #### 게시글 api
-![erd](https://github.com/jeongmin0709/noticeboard/assets/121369135/beabc99c-c0bb-4ba5-bfe6-bfa64d06a902)
+
 
 
     
