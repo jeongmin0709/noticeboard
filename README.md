@@ -265,6 +265,7 @@
 
 ### 3.API 설계
 #### 게시글 api
+![게시글api](https://github.com/jeongmin0709/noticeboard/assets/121369135/12851469-d8e9-486f-b471-e4fdd5e43985)
 
 
 
