@@ -290,22 +290,31 @@
   - 제목, 내용과 함께 이미지도 6개까지 등록 가능
   - summernote web editor 적용
   - 로그인한 사용자만 게시글 등록 가능
-  - 게시글 등록 service 코드
-    https://github.com/jeongmin0709/noticeboard/blob/1f3c94a061b9a70b0eb7f913fb5dd4a01748993d/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L61
+  https://github.com/jeongmin0709/noticeboard/blob/1f3c94a061b9a70b0eb7f913fb5dd4a01748993d/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L61
+
 #### 1.2 게시글 삭제
   - 게시글 id를 이용해 삭제
   - 게시글 삭제시 댓글, 알림, 추천 내역까지 함꼐 삭제
   - 자신의 게시글만 삭제 가능
+  https://github.com/jeongmin0709/noticeboard/blob/1f3c94a061b9a70b0eb7f913fb5dd4a01748993d/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L133
+
 #### 1.3 게시글 수정
   - 제목, 내용, 이미지 수정 가능
   - summernote web editor 적용
   - 자신의 게시글만 수정 가능
+  https://github.com/jeongmin0709/noticeboard/blob/1f3c94a061b9a70b0eb7f913fb5dd4a01748993d/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L145
+
 #### 1.4 게시글 목록 보기
   - 페이징을 사용하여 한페이지에 20개의 제목, 작성작, 추천수, 조회수, 작성일, 이미지 존재여부, 댓글존재여부를 가져옴
   - 이미지 존재여부, 댓글존재여부는 아이콘을 이용해 나타냄
   - 추천순, 조회순으로 정렬 가능
   - 내글, 내댓글, 제목, 내용, 제목+내용, 제목+내용+작성자로 검색 가능
     - 내글, 내댓글 기능은 로그인한 사용자만 사용가능
+  - service layer
+  https://github.com/jeongmin0709/noticeboard/blob/1f3c94a061b9a70b0eb7f913fb5dd4a01748993d/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L70
+  - repository layer
+  https://github.com/jeongmin0709/noticeboard/blob/cd17c8fb8507be3da805643cf5b5c87e1d2ed7f7/src/main/java/com/example/noticeboard/repository/boardrepository/BoardRepositoryImpl.java#L78
+  
 #### 1.5 게시글 상세보기
   - 게시글 전체와 댓글수, 이전페이지, 다음페이지를 가져옴
   - 게시글 상세보기를 클릭하면 조회수 증가
