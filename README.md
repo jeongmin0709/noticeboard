@@ -284,7 +284,7 @@
 #### 3.5 알림 API
 ![알림api](https://github.com/jeongmin0709/noticeboard/assets/121369135/0cc27fd5-42e0-462a-b2ea-92d54bb7b92a)
 
-## 기능 설명
+## 개발 내용 및 기능 설명
 ### 1. 게시글
 #### 1.1 게시글 등록
   - 제목, 내용과 함께 이미지도 6개까지 등록 가능
@@ -330,8 +330,12 @@
     3) 인증번호 확인 요청이 오면 저장소에서 이메일과 인증번호를 찾아서 확인
   - binding result, @Vaildated를 통한 유효성 검사
 #### 2.2 로그인
-  
-    
+  - spring security form login 사용
+  - securty의 인증, 인가 기능을 사용하기위해 UserDetails interface구현체 MemberDTO 개발
+  - UserDeailsService interface 구현체 MeberDeailsSerice 개발, loadUserByUsername 메서드를 오버라이딩
+  - 로그인 성공, 실패를 처리하기 위해 CunstomLoginSuccessHandler, CunstomLoginFailureHandler 개발
+#### 2.3 소셜 로그인
+
     
     
   
