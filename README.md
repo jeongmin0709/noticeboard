@@ -305,7 +305,18 @@
 ## 주요 기능 설명
 ### 1.게시글
 #### 1.1 게시글 목록 조회, 검색, 정렬
-##### 1.1.1 repository layer
+- 추천순, 조회순으로 정렬 기능
+- 내글, 내댓글, 제목, 내용, 작성자, 제목+내용, 제목+내용+작성자 검색 기능
+- 코드
+  - repository 
+    https://github.com/jeongmin0709/noticeboard/blob/cd17c8fb8507be3da805643cf5b5c87e1d2ed7f7/src/main/java/com/example/noticeboard/repository/boardrepository/BoardRepositoryImpl.java#L78
+    - 검색 파라미터에 따라 where문이 변경되거나 내댓글 검색을 할때 comment Table과 join을 동적으로 해야해서 queryDsl을 사용하였습니다.
+  - service
+  https://github.com/jeongmin0709/noticeboard/blob/2aabd4ed4ddf95a86510762a0da1814c92b6b68e/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L48
+  - PageRequestDto
+    https://github.com/jeongmin0709/noticeboard/blob/2aabd4ed4ddf95a86510762a0da1814c92b6b68e/src/main/java/com/example/noticeboard/dto/PageRequestDTO.java#L14
+  - PageResulteDto
+    https://github.com/jeongmin0709/noticeboard/blob/2aabd4ed4ddf95a86510762a0da1814c92b6b68e/src/main/java/com/example/noticeboard/dto/PageResultDTO.java#L19
 
 
     
