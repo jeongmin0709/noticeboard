@@ -310,14 +310,16 @@
 - 코드
   - repository 
     https://github.com/jeongmin0709/noticeboard/blob/cd17c8fb8507be3da805643cf5b5c87e1d2ed7f7/src/main/java/com/example/noticeboard/repository/boardrepository/BoardRepositoryImpl.java#L78
-    - 검색 파라미터에 따라 where문이 변경되거나 내댓글 검색을 할때 comment Table과 join을 동적으로 해야해서 queryDsl을 사용하였습니다.
+    검색 파라미터에 따라 where문이 변경되거나 내댓글 검색을 할때 join을 comment Table과 동적으로 해야해서 queryDsl을 사용하였습니다. 제목, 내용, 작성자 검색은 searchCondition함수를 통해 구현하였고 내글, 내댓글 검색은 myBoardOrComment함수를 통해 구현하였습니다.
+    이미지 존재여부와 댓글 수를 표시하고 싶어서 처음에는 comment Table과 image Table을 조인 후 group by를 통해 구현하려 하였습니다. 하지만 모든 게시글에 대한 group by는 성능을 너무 악화 시켜서
+    select 절의 서브쿼리로 해당 기능을 구현하였습니다. select절의 서브쿼리는 limit를 한뒤 실행되기때문에 성능이 많이 향상되었습니다.
   - service
-  https://github.com/jeongmin0709/noticeboard/blob/2aabd4ed4ddf95a86510762a0da1814c92b6b68e/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L48
+    https://github.com/jeongmin0709/noticeboard/blob/2aabd4ed4ddf95a86510762a0da1814c92b6b68e/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L48
   - PageRequestDto
     https://github.com/jeongmin0709/noticeboard/blob/2aabd4ed4ddf95a86510762a0da1814c92b6b68e/src/main/java/com/example/noticeboard/dto/PageRequestDTO.java#L14
   - PageResulteDto
     https://github.com/jeongmin0709/noticeboard/blob/2aabd4ed4ddf95a86510762a0da1814c92b6b68e/src/main/java/com/example/noticeboard/dto/PageResultDTO.java#L19
-
+    pageResultDTO는 재사용성을 위해 Generics 타입을 이용하였습니다. makePageList함수를 통해 이전, 다음, 시작페이지, 끝페이지를 계산합니다.
 
     
     
