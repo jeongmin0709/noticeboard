@@ -286,6 +286,8 @@
 
 ## 개발 내용 및 기능 설명
 ### 1. 게시글
+- 게시글 dto
+https://github.com/jeongmin0709/noticeboard/blob/f735a955d7a331854b413bff762aaf2f60a06744/src/main/java/com/example/noticeboard/security/dto/MemberDTO.java
 #### 1.1 게시글 등록
   - 제목, 내용과 함께 이미지도 6개까지 등록 가능
   - summernote web editor 적용
