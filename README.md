@@ -286,12 +286,12 @@
 
 ## 개발 내용 및 기능 설명
 ### 1. 게시글
-- 게시글 dto
-https://github.com/jeongmin0709/noticeboard/blob/f735a955d7a331854b413bff762aaf2f60a06744/src/main/java/com/example/noticeboard/security/dto/MemberDTO.java
 #### 1.1 게시글 등록
   - 제목, 내용과 함께 이미지도 6개까지 등록 가능
   - summernote web editor 적용
   - 로그인한 사용자만 게시글 등록 가능
+  - 게시글 등록 service 코드
+    https://github.com/jeongmin0709/noticeboard/blob/1f3c94a061b9a70b0eb7f913fb5dd4a01748993d/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L61
 #### 1.2 게시글 삭제
   - 게시글 id를 이용해 삭제
   - 게시글 삭제시 댓글, 알림, 추천 내역까지 함꼐 삭제
