@@ -55,6 +55,10 @@
   - 추천 및 추천 중복방지
   - 게시글 목록 페이징 (정렬및 검색)
   - 조회수 및 조회수 중복 방지
+#### 5.2 이미지 기능
+  - 이미지 업로드
+  - 이미지 조회
+  - 이미지 삭제
 #### 5.2 회원 기능
   - 회원가입
   - 일반로그인
@@ -66,7 +70,7 @@
   - CRUD
   - 댓글 목록 슬라이스 
   - 답글
-  - 추천
+  - 추천 및 추천 중복방지
 #### 5.4 알림 기능
   - 알림 구독
   - 추천 알림, 댓글 알림
@@ -295,69 +299,8 @@
 #### 3.5 알림 API
 ![알림api](https://github.com/jeongmin0709/noticeboard/assets/121369135/0cc27fd5-42e0-462a-b2ea-92d54bb7b92a)
 
-## 개발 내용 및 기능 설명
-### 1. 게시글
-#### 1.1 게시글 등록
-  - 이미지 
-  - summernote web editor 적용
-  - 로그인한 사용자만 게시글 등록 가능
-  https://github.com/jeongmin0709/noticeboard/blob/1f3c94a061b9a70b0eb7f913fb5dd4a01748993d/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L61
+## 주요 기능 설명
 
-#### 1.2 게시글 삭제
-  - 게시글 id를 이용해 삭제
-  - 게시글 삭제시 댓글, 알림, 추천 내역까지 함꼐 삭제
-  - 자신의 게시글만 삭제 가능
-  https://github.com/jeongmin0709/noticeboard/blob/1f3c94a061b9a70b0eb7f913fb5dd4a01748993d/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L133
-
-#### 1.3 게시글 수정
-  - 제목, 내용, 이미지 수정 가능
-  - summernote web editor 적용
-  - 자신의 게시글만 수정 가능
-  https://github.com/jeongmin0709/noticeboard/blob/1f3c94a061b9a70b0eb7f913fb5dd4a01748993d/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L145
-
-#### 1.4 게시글 목록 보기
-  - 페이징을 사용하여 한페이지에 20개의 제목, 작성작, 추천수, 조회수, 작성일, 이미지 존재여부, 댓글존재여부를 가져옴
-  - 이미지 존재여부, 댓글존재여부는 아이콘을 이용해 나타냄
-  - 추천순, 조회순으로 정렬 가능
-  - 내글, 내댓글, 제목, 내용, 제목+내용, 제목+내용+작성자로 검색 가능
-    - 내글, 내댓글 기능은 로그인한 사용자만 사용가능
-  - service layer
-  https://github.com/jeongmin0709/noticeboard/blob/1f3c94a061b9a70b0eb7f913fb5dd4a01748993d/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L70
-  - repository layer
-  https://github.com/jeongmin0709/noticeboard/blob/cd17c8fb8507be3da805643cf5b5c87e1d2ed7f7/src/main/java/com/example/noticeboard/repository/boardrepository/BoardRepositoryImpl.java#L78
-  
-#### 1.5 게시글 상세보기
-  - 게시글 전체와 댓글수, 이전페이지, 다음페이지를 가져옴
-  - 게시글 상세보기를 클릭하면 조회수 증가
-  - 쿠키를 이용하여 조회수 중복증가 방지
-    1) 게시글 상세페이지 요청이오면 게시글 조회 쿠키가 있는지 확인
-    2) 쿠키가 없다면 조회수를 증가시키고 쿠키를 생성, 쿠키에 게시글 id를 추가한 후 응답
-    3) 쿠키가 있다면 쿠키에 현재 조회한 게시글 id가 잇는지 확인
-    4) 없다면 조회수를 증가시키고 쿠키에 게시글 id를 추가한 후 응답
-    5) 있다면 조회수 증가 x
-#### 1.6 게시글 추천
-  - 비동기 요청으로 게시글 추천 구현
-  - 로그인한 사용자만 추천 가능
-  - 게시글 추천 중복 방지
-    - 회원-게시글 테이블을 만들어 게시글 추천 내역을 저장
-    - 추천요청이 왔을때 회원-게시글 테이블에 추천 내역이 있는지 확인하고 있다면 추천x
-  - 자신의 게시글에 추천 방지
-### 2. 회원
-  - spring security를 통해 회원 서비스 개발
-#### 2.1 회원가입
-  - 아이디, 이름, 이메일, 비밀번호를 입력
-  - 이메일 인증번호를 통한 이메일 인증
-    1) 사용자가 이메일 인증번호 발송 비동기 요청
-    2) 서버에서 해당 이메일로 인증번호 발송 후 reads 저장소에 이메일과 인증번호를 저장
-    3) 인증번호 확인 요청이 오면 저장소에서 이메일과 인증번호를 찾아서 확인
-  - binding result, @Vaildated를 통한 유효성 검사
-#### 2.2 로그인
-  [package com.example.noticeboard.security.dto;](https://github.com/jeongmin0709/noticeboard/blob/f735a955d7a331854b413bff762aaf2f60a06744/src/main/java/com/example/noticeboard/security/dto/MemberDTO.java#L1)
-  - spring security form login 사용
-  - securty의 인증, 인가 기능을 사용하기위해 UserDetails interface구현체 MemberDTO 개발
-  - UserDeailsService interface 구현체 MeberDeailsSerice 개발, loadUserByUsername 메서드를 오버라이딩
-  - 로그인 성공, 실패를 처리하기 위해 CunstomLoginSuccessHandler, CunstomLoginFailureHandler 개발
-#### 2.3 소셜 로그인
 
     
     
