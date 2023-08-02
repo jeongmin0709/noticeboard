@@ -287,7 +287,7 @@
 ## 개발 내용 및 기능 설명
 ### 1. 게시글
 #### 1.1 게시글 등록
-  - 제목, 내용과 함께 이미지도 6개까지 등록 가능
+  - 이미지 
   - summernote web editor 적용
   - 로그인한 사용자만 게시글 등록 가능
   https://github.com/jeongmin0709/noticeboard/blob/1f3c94a061b9a70b0eb7f913fb5dd4a01748993d/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L61
