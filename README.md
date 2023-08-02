@@ -330,6 +330,7 @@
     3) 인증번호 확인 요청이 오면 저장소에서 이메일과 인증번호를 찾아서 확인
   - binding result, @Vaildated를 통한 유효성 검사
 #### 2.2 로그인
+  [package com.example.noticeboard.security.dto;](https://github.com/jeongmin0709/noticeboard/blob/f735a955d7a331854b413bff762aaf2f60a06744/src/main/java/com/example/noticeboard/security/dto/MemberDTO.java#L1)
   - spring security form login 사용
   - securty의 인증, 인가 기능을 사용하기위해 UserDetails interface구현체 MemberDTO 개발
   - UserDeailsService interface 구현체 MeberDeailsSerice 개발, loadUserByUsername 메서드를 오버라이딩
