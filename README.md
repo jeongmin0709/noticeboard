@@ -319,8 +319,58 @@
     https://github.com/jeongmin0709/noticeboard/blob/2aabd4ed4ddf95a86510762a0da1814c92b6b68e/src/main/java/com/example/noticeboard/dto/PageRequestDTO.java#L14
   - PageResulteDto
     https://github.com/jeongmin0709/noticeboard/blob/2aabd4ed4ddf95a86510762a0da1814c92b6b68e/src/main/java/com/example/noticeboard/dto/PageResultDTO.java#L19
-    pageResultDTO는 재사용성을 위해 Generics 타입을 이용하였습니다. makePageList함수를 통해 이전, 다음, 시작페이지, 끝페이지를 계산합니다.
-
-    
-    
-  
+    pageResultDTO는 재사용성을 위해 Generics 타입을 이용하였습니다. makePageList함수를 통해 이전, 다음, 시작페이지, 끝페이지를 계산합니다
+#### 1.2 게시글 조회 및 이전게시글 다음게시글 조회
+  - 게시글 조회시 게시글과 댓글 수, 이전게시글과 다음게시글의 아이디와 제목을 조회
+  - 코드
+    - repositorty 
+    https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/repository/boardrepository/BoardRepositoryImpl.java#L38
+    https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/repository/boardrepository/BoardRepositoryImpl.java#L61
+    getBoard 함수는 게시글과 댓글 수를, getPrevAndNextBoard는 이전글과 다음글을 조회하는 함수입니다. 이전글과 다음글을 구현할때 LEAD, LAG 윈도우함수등을 사용할까 했지만 native query는 되도록 지양하고 싶어서 다음과 같이 구현하였습니다.
+    - service
+    https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L70
+    getBoard 함수에서는 게시글과 댓글 수를 먼저 조회한 후, 이전글과 다음글으 조회합니다. 그리고 dto로 변환하고 conroller로 리턴하게 됩니다.
+#### 1.3 게시글 추천 및 중복방지
+  - 코드 
+    - controller
+    https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/controller/BoardRestController.java#L21
+    게시글 추천은 자신의 게시글 추천이나 중복추천이 불가능해야하기때문에 처음에는 controller에서 접근을 막으려했습니다. 하지만 권한 확인을 위해서는 db데이터가 필요하기 때문에 service로 권한 확인을 위임하였습니다.
+    - service
+    https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L10
+    recommendBoard 함수에서는 자신의 게시글이나 중복 추천일경우 추천을 하지 못하도록 검사를 합니다. 중복추천의 경우 추천을하는 회원과 게시글은 다대다 관계이기때문에 memberBoard table을 만들어 1대다 다대1관계로 풀었습니다.
+    중복추천을 확인할때 MemberBoard table에서 추천내역을 조회하고 있다면 예외를 터트리고 없다면 추천수를 증가시키고 memberBoard table에 추천내역을 저장하였습니다.
+#### 1.4 게시글 조회수 및 중복 방지
+  - 코드
+    - controller
+    https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/controller/BoardController.java#L57
+    게시글 조회 요청이 오면 게시글 조회 후 조회수 증가 함수인 increaseViewNum함수를 호출합니다.
+    https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/controller/BoardController.java#L130
+    조회수 중복 방지는 쿠키를 이용합니다.
+      1) request에서 "boardView"라는 쿠키가 있는지 확인합니다.
+      2) 쿠키가 없다면 "boardview" 쿠키를 생성하고 쿠키안에 게시글 id를 저장하고 쿠키가 있다면 쿠키안에 게시글 id가 있는지 확인합니다.
+      3) 게시글 id가 없다면 조회수를 증가시킨 후 쿠키에 게시글 id를 저장하고 있다면 조회수를 증가시키지 않습니다.  
+### 2. 회원
+  - 회원 서비스를 개발하기 위해서 spring security를 사용하였습니다. jwt방식과 session방식중 뭘 선택할까 고민하였는데 토이프로젝트에서는 session방식 더적합하다고 생각하여 session방식 방식을 사용하였습니다.
+#### 2.1 일반 로그인
+  - 코드
+    - MemberDTO 
+    https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/security/dto/MemberDTO.java#L20
+    sping security 인증, 인가기능을 사용하기 위해서 UserDetails interface를 구현하였습니다
+    - service
+    https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/security/service/MemberDetailsService.java#L28
+    로그인을 위해 UsernamePasswordAuthenticationFilter가 실행되는데 해당필터는 getAuthenticationManager에게 인증을 위임하고 UserDetailsService를 호출하기 때문에 UserDetailsService
+    의 구현체 MemberDetailsService를 개발하였습니다.
+    - loginSuccessHandler
+    https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/security/handler/LoginSuccessHandler.java#L16
+    제프로젝트에는 로그인화면으로가는 3가지 경우의 수가 있습니다.
+      1) 로그인 하지않은 사용자가 로그인이 필요한 페이지를 요청(spring security가 강제인터셉트후 로그인 페이지로 redirect)
+      2) 로그인 하지않은 사용자가 로그인이 필요한 비동기 요청(frontend에서 401 response를 받으면 location.href를 통해 로그인 페이지로 이동)
+      3) 직접 로그인 링크를 눌러서 로그인 페이지로 이동   
+      1)의 경우 이전 페이지가 HttpSessionRequestCache()저장되어 있고 2), 3)의 경우 로그인 페이지 요청시 header의 Referer 필드에 이전페이지가 저장되어있기때문에 session에 이전페이지를 저장한 후 사용하였습니다.
+    - loginFailuerHandelr
+    https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/security/handler/LoginFailureHandler.java#L25
+    - interceptor
+    https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/web/interceptor/LogInterceptor.java#L35
+    로그인이 실패하면 실패 메세지를 로그인 페이지에 출력해야 하는데 처음에는 forward를 통해 해당 기능을 구현하려 하였습니다. 하지만 로그인은 post 요청이고 로그인 페이지는 get요청이기 떄문에 작동하지 않았습니다. 그래서
+    두번째로는 redirect url에 실패메세지를 실어서 reirect를 했습니다. 실행은 잘되었지만 url에 긴 메시지가 직접적으로 들어가는게 이상하다고 생각하여 마지막으로 seession에 실패메시지를 저장하고 intercepter의 posthander 함수를 통해 실패
+    메시지가 seession에 있으면 modelAndView에 실패 메시지 attribute를 추가하는 방식을 사용하였습니다. 검색해보니 제가 생각해낸 방식이 redirectattributes.addflashattribute와 비슷한 방식이였습니다.
