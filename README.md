@@ -374,3 +374,11 @@
     로그인이 실패하면 실패 메세지를 로그인 페이지에 출력해야 하는데 처음에는 forward를 통해 해당 기능을 구현하려 하였습니다. 하지만 로그인은 post 요청이고 로그인 페이지는 get요청이기 떄문에 작동하지 않았습니다. 그래서
     두번째로는 redirect url에 실패메세지를 실어서 reirect를 했습니다. 실행은 잘되었지만 url에 긴 메시지가 직접적으로 들어가는게 이상하다고 생각하여 마지막으로 seession에 실패메시지를 저장하고 intercepter의 posthander 함수를 통해 실패
     메시지가 seession에 있으면 modelAndView에 실패 메시지 attribute를 추가하는 방식을 사용하였습니다. 검색해보니 제가 생각해낸 방식이 redirectattributes.addflashattribute와 비슷한 방식이였습니다.
+#### 2.2 소셜 로그인
+  - 소셜로그인은 oauth2를 사용해 구현하였습니다.
+  - 네이버, 카카오, 구글 로그인이 가능힙낟.
+  - 코드
+    - service
+    https://github.com/jeongmin0709/noticeboard/blob/7a91c730eb35b4b0cfbb0b4ec596b60f5bec95b5/src/main/java/com/example/noticeboard/security/service/Oauth2MemberDetailsService.java#L22C49-L22C73
+    DefaultOAuth2UserService를 상속받아 Oauth2MemberDetailsService를 구현하였습니다. sper.loadUser를 통해 소셜 로그인 사용자 정보를 받아오고 해당 정보를 바탕으로 member table에서 memberEntity를 가져옵니다.
+    최초로그인일 경우 member table에 저장하게 됩니다.
