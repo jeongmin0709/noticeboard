@@ -379,6 +379,13 @@
   - 네이버, 카카오, 구글 로그인이 가능힙낟.
   - 코드
     - service
-    https://github.com/jeongmin0709/noticeboard/blob/7a91c730eb35b4b0cfbb0b4ec596b60f5bec95b5/src/main/java/com/example/noticeboard/security/service/Oauth2MemberDetailsService.java#L22C49-L22C73
-    DefaultOAuth2UserService를 상속받아 Oauth2MemberDetailsService를 구현하였습니다. sper.loadUser를 통해 소셜 로그인 사용자 정보를 받아오고 해당 정보를 바탕으로 member table에서 memberEntity를 가져옵니다.
+    https://github.com/jeongmin0709/noticeboard/blob/7a91c730eb35b4b0cfbb0b4ec596b60f5bec95b5/src/main/java/com/example/noticeboard/security/service/Oauth2MemberDetailsService.java#L28
+    DefaultOAuth2UserService를 상속받아 Oauth2MemberDetailsService를 구현하였습니다. super.loadUser를 통해 소셜 로그인 사용자 정보를 받아오고 해당 정보를 바탕으로 member table에서 memberEntity를 가져옵니다.
     최초로그인일 경우 member table에 저장하게 됩니다.
+#### 2.3 이메일 인증
+  - 쿠기를 통해 인증번호를 저장할수도 있지만 frontend에서 인증번호를 가지고있는 것은 좋지 않다고 생각하여 redis memoery DB를 이용하여 해당 기능을 구현하였습니다.
+  - 코드
+    - service
+    https://github.com/jeongmin0709/noticeboard/blob/ab83b41c98f7c7b2495ce54c1f75a9adbf71afaa/src/main/java/com/example/noticeboard/service/EmailServiceImpl.java#L25
+    JavaMeilSender를 이용해 랜덤으로 생성된 인증번호를 전송하게 됩니다. 그리고 이메일과 인증번호를 30분의 유효시간으로 redis에 저장합니다. 인증 요청이 오면 이메일을 통해 redis에서 인증번호를 가져오고 인증을 진행합니다.
+### 3. 댓글
