@@ -24,10 +24,14 @@
     - 소셜 로그인
     - 이메일 인증
   - 댓글
-     - 댓글 슬라이스
-     - 답글
+     - 댓글 목록 조회
+     - 답글 목록 조회
   - 알림
-    - 추천 및 댓글 알림
+    - 알림 구독
+    - 알림 읽음처리
+    - 실시간 알림 전송
+  - 예외처리
+  - 유효성 검사
 ## 개요
 ### 1.프로젝트 소개
 인프런 강의와 책을통한 독학으로 관련 기술들을 학습한 후에 제작한 게시판 프로젝트입니다. 이것 저것 하기보다는 배운거라도 확실히 하자는 생각으로 개발하였습니다.
@@ -305,12 +309,12 @@
 ## 주요 기능 설명
 ### 1.게시글
 #### 1.1 게시글 목록 조회, 검색, 정렬
-- 추천순, 조회순으로 정렬 기능
-- 내글, 내댓글, 제목, 내용, 작성자, 제목+내용, 제목+내용+작성자 검색 기능
+- 추천순, 조회순으로 정렬
+- 내글, 내댓글, 제목, 내용, 작성자, 제목+내용, 제목+내용+작성자 검색
 - 코드
   - repository 
     https://github.com/jeongmin0709/noticeboard/blob/cd17c8fb8507be3da805643cf5b5c87e1d2ed7f7/src/main/java/com/example/noticeboard/repository/boardrepository/BoardRepositoryImpl.java#L78
-    검색 파라미터에 따라 where문이 변경되거나 내댓글 검색을 할때 join을 comment Table과 동적으로 해야해서 queryDsl을 사용하였습니다. 제목, 내용, 작성자 검색은 searchCondition함수를 통해 구현하였고 내글, 내댓글 검색은 myBoardOrComment함수를 통해 구현하였습니다.
+    검색 파라미터에 따라 where문이 변경되거나 내댓글 검색을 할때 comment Table과 동적으로  join을 해야해서 queryDsl을 사용하였습니다. 제목, 내용, 작성자 검색은 searchCondition함수를 통해 구현하였고 내글, 내댓글 검색은 myBoardOrComment함수를 통해 구현하였습니다.
     이미지 존재여부와 댓글 수를 표시하고 싶어서 처음에는 comment Table과 image Table을 조인 후 group by를 통해 구현하려 하였습니다. 하지만 모든 게시글에 대한 group by는 성능을 너무 악화 시켜서
     select 절의 서브쿼리로 해당 기능을 구현하였습니다. select절의 서브쿼리는 limit를 한뒤 실행되기때문에 성능이 많이 향상되었습니다.
   - service
@@ -329,7 +333,7 @@
     getBoard 함수는 게시글과 댓글 수를, getPrevAndNextBoard는 이전글과 다음글을 조회하는 함수입니다. 이전글과 다음글을 구현할때 LEAD, LAG 윈도우함수등을 사용할까 했지만 native query는 되도록 지양하고 싶어서 다음과 같이 구현하였습니다.
     - service
     https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L70
-    getBoard 함수에서는 게시글과 댓글 수를 먼저 조회한 후, 이전글과 다음글으 조회합니다. 그리고 dto로 변환하고 conroller로 리턴하게 됩니다.
+    getBoard 함수에서는 게시글과 댓글 수를 먼저 조회한 후 이전글과 다음글을 조회합니다. 마지막으로 BoardDto로 변환한뒤 conroller에 리턴하게 됩니다.
 #### 1.3 게시글 추천 및 중복방지
   - 코드 
     - controller
@@ -337,8 +341,8 @@
     게시글 추천은 자신의 게시글 추천이나 중복추천이 불가능해야하기때문에 처음에는 controller에서 접근을 막으려했습니다. 하지만 권한 확인을 위해서는 db데이터가 필요하기 때문에 service로 권한 확인을 위임하였습니다.
     - service
     https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/service/BoardServiceImpl.java#L10
-    recommendBoard 함수에서는 자신의 게시글이나 중복 추천일경우 추천을 하지 못하도록 검사를 합니다. 중복추천의 경우 추천을하는 회원과 게시글은 다대다 관계이기때문에 memberBoard table을 만들어 1대다 다대1관계로 풀었습니다.
-    중복추천을 확인할때 MemberBoard table에서 추천내역을 조회하고 있다면 예외를 터트리고 없다면 추천수를 증가시키고 memberBoard table에 추천내역을 저장하였습니다.
+    recommendBoard 함수에서는 자신의 게시글이나 중복 추천일경우 추천을 하지 못하도록 검사를 합니다. 중복추천의 경우 추천을하는 회원과 게시글은 다대다 관계이기때문에 MemberBoard table을 만들어 1대다 다대1관계로 풀었습니다.
+    중복추천을 확인할때 MemberBoard table에서 추천내역을 조회하고 있다면 예외를 터트리고 없다면 추천수를 증가시킨 후 memberBoard table에 추천내역을 저장하였습니다.
 #### 1.4 게시글 조회수 및 중복 방지
   - 코드
     - controller
@@ -371,21 +375,57 @@
     https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/security/handler/LoginFailureHandler.java#L25
     - interceptor
     https://github.com/jeongmin0709/noticeboard/blob/00b8e19c20cd179d9b8fca163e49d66ca591c0f4/src/main/java/com/example/noticeboard/web/interceptor/LogInterceptor.java#L35
-    로그인이 실패하면 실패 메세지를 로그인 페이지에 출력해야 하는데 처음에는 forward를 통해 해당 기능을 구현하려 하였습니다. 하지만 로그인은 post 요청이고 로그인 페이지는 get요청이기 떄문에 작동하지 않았습니다. 그래서
-    두번째로는 redirect url에 실패메세지를 실어서 reirect를 했습니다. 실행은 잘되었지만 url에 긴 메시지가 직접적으로 들어가는게 이상하다고 생각하여 마지막으로 seession에 실패메시지를 저장하고 intercepter의 posthander 함수를 통해 실패
+    로그인이 실패하면 실패 메세지를 로그인 페이지에 출력해야 하는데 처음에는 forward를 통해 해당 기능을 구현하려 하였습니다. 하지만 로그인은 post 요청이고 로그인 페이지는 get요청이기 때문에 예외가 발생하였습니다. 그래서
+    두번째로는 redirect url에 실패메세지를 추가한 후 reirect를 했습니다. 실행은 잘되었지만 url에 긴 샐피 메시지가 직접 들어가는게 이상하다고 생각하여 마지막으로 seession에 실패메시지를 저장하고 intercepter의 posthander 함수를 통해 실패
     메시지가 seession에 있으면 modelAndView에 실패 메시지 attribute를 추가하는 방식을 사용하였습니다. 검색해보니 제가 생각해낸 방식이 redirectattributes.addflashattribute와 비슷한 방식이였습니다.
 #### 2.2 소셜 로그인
-  - 소셜로그인은 oauth2를 사용해 구현하였습니다.
-  - 네이버, 카카오, 구글 로그인이 가능힙낟.
+  - 소셜로그인은 oauth2를 사용해 구현.
+  - 네이버, 카카오, 구글 로그인이 가능.
   - 코드
     - service
     https://github.com/jeongmin0709/noticeboard/blob/7a91c730eb35b4b0cfbb0b4ec596b60f5bec95b5/src/main/java/com/example/noticeboard/security/service/Oauth2MemberDetailsService.java#L28
     DefaultOAuth2UserService를 상속받아 Oauth2MemberDetailsService를 구현하였습니다. super.loadUser를 통해 소셜 로그인 사용자 정보를 받아오고 해당 정보를 바탕으로 member table에서 memberEntity를 가져옵니다.
     최초로그인일 경우 member table에 저장하게 됩니다.
 #### 2.3 이메일 인증
-  - 쿠기를 통해 인증번호를 저장할수도 있지만 frontend에서 인증번호를 가지고있는 것은 좋지 않다고 생각하여 redis memoery DB를 이용하여 해당 기능을 구현하였습니다.
+  - 쿠기를 통해 인증번호를 저장할수도 있지만 frontend에서 인증번호를 가지고있는 것은 좋지 않다고 생각하여 redis memory DB를 이용하여 해당 기능을 구현하였습니다.
   - 코드
     - service
     https://github.com/jeongmin0709/noticeboard/blob/ab83b41c98f7c7b2495ce54c1f75a9adbf71afaa/src/main/java/com/example/noticeboard/service/EmailServiceImpl.java#L25
-    JavaMeilSender를 이용해 랜덤으로 생성된 인증번호를 전송하게 됩니다. 그리고 이메일과 인증번호를 30분의 유효시간으로 redis에 저장합니다. 인증 요청이 오면 이메일을 통해 redis에서 인증번호를 가져오고 인증을 진행합니다.
+    JavaMeilSender를 이용해 랜덤으로 생성된 인증번호를 receiver에게 전송하게 됩니다. 그리고 이메일과 인증번호를 30분의 유효시간으로 redis에 저장합니다. 인증 요청이 오면 이메일을 통해 redis에서 인증번호를 가져오고 인증을 진행합니다.
 ### 3. 댓글
+#### 3.1 댓글목록 조회
+  - 댓글 목록을조회는 무한스크롤 방식을 사용하였습니다.
+  - 코드
+    - repository
+    https://github.com/jeongmin0709/noticeboard/blob/a9d3d37374c1d65e1d0850eedec23a602b8cd2de/src/main/java/com/example/noticeboard/repository/commentRepository/CommentRepositoryImpl.java#L28
+    무한스크롤 방식의경우 데이터의 전체 크기가 필요없고 다음 페이지가 존재하는지만 알면 되기때문에 댓글 목록과 답글 개수를 조회한 후 Column 개수가 pageSize 보다 작으면 hasNext=true 아니면 false로 구현하였습니다.
+    마지막으로 Slice 클래스를 리턴합니다.
+#### 3.2 답글목록 조회
+  - 답글의경우 최대한 간단하게 comment Entity에 parent id를 추가하는 방식으로 구현하였습니다. 조회는 댓글 조회와 방식이 같습니다.
+### 4. 알림
+  - 알림 기능의 경우 서버에서 생성된 알림이 요청 없이도 사용자에게 전송되어야 하기때문에 기존의 httpProtocol로는 구현할수 없어 SSE(Server Send Message)를 사용하였습니다. WebSocket사용도 고려해 보았지만 서버 클라이언트 단방향
+  통신만 있어도 알림기능을 구현할수있기 때문에 더가볍고 사용하기 쉬운 sse를 선택하였습니다.
+#### 3.1 알림 구독
+  - repository
+  https://github.com/jeongmin0709/noticeboard/blob/a9d3d37374c1d65e1d0850eedec23a602b8cd2de/src/main/java/com/example/noticeboard/repository/EmitterRepositoryImpl.java#L11
+  ConcurrentHashMap을 사용하여 멀티쓰레딩에서도 안전하게 만들었습니다. SseEmitter 저장, 조회, 삭제를 수행합니다.
+  - service
+  https://github.com/jeongmin0709/noticeboard/blob/a9d3d37374c1d65e1d0850eedec23a602b8cd2de/src/main/java/com/example/noticeboard/service/NotificationServiceImpl.java#L46
+  알림 구독 요청이오면 emitter id와 emitter을 생성합니다. emitter id를 username + system.currentTimeMillis() 로 하는 이유는 브라우저에서 최대 6개의 emitter을 가질수 있기 때문입니다. emmiter을 저장한 후 최초로 알림목록을 전송하게됩니다.
+#### 3.2 알림 전송
+  - service
+  https://github.com/jeongmin0709/noticeboard/blob/a9d3d37374c1d65e1d0850eedec23a602b8cd2de/src/main/java/com/example/noticeboard/service/NotificationServiceImpl.java#L91
+  알림전송은 모듈간의 의존성을 낮추기 위해  @EventListener 어노테이션을 사용하였습니다. 댓글 등록이나 추천을 하면 알림 이벤트가 발행 되고 해당 함수가 이벤트를 처리하게 됩니다. 알림 종류에 따라 알림을 생성하고 receiver에게 알림을 전송합니다.
+#### 3.2 알림 읽음처리
+  - service
+  https://github.com/jeongmin0709/noticeboard/blob/a9d3d37374c1d65e1d0850eedec23a602b8cd2de/src/main/java/com/example/noticeboard/service/NotificationServiceImpl.java#L72
+  사용자에게 읽지 않은 알림의 개수를 표시해야하기 때문에 Notification Entity는 isRead 필드를 가지고 있는데 해당 필드를 업테이트 하는 함수입니다.
+### 예외처리
+  - ControllerAdvice
+  https://github.com/jeongmin0709/noticeboard/blob/a9d3d37374c1d65e1d0850eedec23a602b8cd2de/src/main/java/com/example/noticeboard/exception/exception_handler/RestControllerExceptionHandler.java#L33  
+  - ErrorCode
+  https://github.com/jeongmin0709/noticeboard/blob/a9d3d37374c1d65e1d0850eedec23a602b8cd2de/src/main/java/com/example/noticeboard/exception/ErrorCode.java#L9
+  - ExceptionDTO
+  https://github.com/jeongmin0709/noticeboard/blob/a9d3d37374c1d65e1d0850eedec23a602b8cd2de/src/main/java/com/example/noticeboard/exception/ExceptionDTO.java#L17
+  예외처리의 경우 전역으로 예외를 처리할 수 있는 @ControllerAdivce 어노테이션을 사용하였습니다. 예외를 전역으로 처리하려다보니 기존의 Exception들 만으로는 힘들다고 판단하여 CustomException을 사용하였습니다. 또한 예외에 대한
+  Reponse메시지의 일관성이 중요하다는 내용을 강의에서 배웠기때문에 ExceptionDTO를 정의하였습니다. ExceptionDTO에는 서버에서 정의한 code, message, status, fieldErrorList 4개로 구성됩니다. 
