@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{/layout :: setContent(~{this :: title}, ~{this :: link}, ~{this :: content})}">
+      th:replace="~{layout :: setContent(~{this :: title}, ~{this :: link}, ~{this :: content})}">
 <header>
     <title th:text="#{title.signup}">Notice Board SignUp</title>
     <th:block th:fragment="link"></th:block>
@@ -12,10 +12,10 @@
             <div class="m-auto px-2 px-sm-3 px-md-4 px-lg-5 singup p-5 shadow rounded-3" style="max-width: 500px">
                 <div class="row mb-4 mx-1 border-4">
                     <div class="col-md px-0 py-md-3 d-flex justify-content-center">
-                        <span class="mb-0 fs-1 fw-bold"><img th:src="@{/assets/img/logo.png}" class="img-fluid"></span>
+                        <span class="mb-0 fs-1 fw-bold"><img th:src="@{assets/img/logo.png}" class="img-fluid"></span>
                     </div>
                 </div>
-                <form id="signupForm" th:action="@{/members}" th:method="post" th:object="${memberDTO}">
+                <form id="signupForm" th:action="@{members}" th:method="post" th:object="${memberDTO}">
                     <input type="hidden" name="uuid">
                     <div class="form-floating mb-4">
                         <input class="form-control" id="username" th:field="*{username}" th:errorclass="is-invalid" type="text" placeholder="아이디"/>

@@ -32,7 +32,7 @@ public class BoardController {
     @GetMapping("/")
     @PreAuthorize("permitAll()")
     public String layout(){
-        return "redirect:/list";
+        return "redirect:list";
     }
 
     @GetMapping("/list")
@@ -41,7 +41,7 @@ public class BoardController {
         log.info("게시글 목록 화면 요청");
         PageResultDTO<PagingBoardDTO, Board> pageResultDTO = boardService.getList(pageRequestDTO, memberDTO);
         model.addAttribute("result", pageResultDTO);
-        return "/list";
+        return "list";
     }
 
     @GetMapping("/register")
@@ -49,7 +49,7 @@ public class BoardController {
     public String registerFrom(PageRequestDTO pageRequestDTO, Model model) {
         log.info("게시글 등록 화면 요청");
         model.addAttribute("pageRequestDTO", pageRequestDTO);
-        return "/register";
+        return "register";
     }
 
     @GetMapping("/read/{id}")
@@ -63,7 +63,7 @@ public class BoardController {
         BoardDTO boardDTO = boardService.getBoard(id);
         increaseViewNum(id, request, response);
         model.addAttribute("boardDTO", boardDTO);
-        return "/read";
+        return "read";
     }
 
     @GetMapping("/modify/{id}")
@@ -73,7 +73,7 @@ public class BoardController {
         BoardDTO boardDTO = boardService.getBoard(id);
         model.addAttribute("boardDTO", boardDTO);
         model.addAttribute("pageRequestDTO", pageRequestDTO);
-        return "/modify";
+        return "modify";
     }
 
 

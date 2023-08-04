@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{/layout :: setContent(~{this :: title}, ~{this :: link}, ~{this :: content})}">
+      th:replace="~{layout :: setContent(~{this :: title}, ~{this :: link}, ~{this :: content})}">
 <header>
     <title th:text="#{title.list}"></title>
     <th:block th:fragment="link"></th:block>
@@ -46,7 +46,7 @@
             <!--list-->
             <ul class="list-group list-group-flush">
                 <th:block th:each="dto : ${result.dtoList}">
-                    <div class="list-group-item list-group-item-action" th:onclick="|location.href='@{/read/{id}(id=${dto.id}, page=${result.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword}, order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}'|">
+                    <div class="list-group-item list-group-item-action" th:onclick="|location.href='@{read/{id}(id=${dto.id}, page=${result.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword}, order=${pageRequestDTO.order}, my=${pageRequestDTO.my})}'|">
                         <div class="row py-lg-1">
                             <div class="col-lg-7">
                                 <div class="d-flex fs-5">
@@ -99,7 +99,7 @@
             </div>
 
             <!--sarch-->
-            <form th:action="@{/list}" id="searchForm" th:method="get">
+            <form th:action="@{list}" id="searchForm" th:method="get">
                 <div class="row my-5 mx-1 justify-content-center">
                     <input type="hidden" name="page" value="1">
                     <div class="col-md-2 p-0 mb-2 mb-md-0">

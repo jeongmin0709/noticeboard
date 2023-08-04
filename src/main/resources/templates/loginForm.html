@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{/layout :: setContent(~{this :: title}, ~{this :: link}, ~{this :: content})}">
+      th:replace="~{layout :: setContent(~{this :: title}, ~{this :: link}, ~{this :: content})}">
 <header>
     <title th:text="#{title.login}">로그인</title>
     <th:block th:fragment="link"></th:block>
@@ -10,9 +10,9 @@
     <section>
         <div class="container">
             <div class="mx-auto py-5 px-2 px-sm-3 px-md-4 px-lg-5 login shadow rounded-4" style="max-width: 460px">
-                <form id="loginForm" th:action="@{/login}" th:method="post">
+                <form id="loginForm" th:action="@{login}" th:method="post">
                     <div class="col-md px-0 py-md-3 d-flex mb-5 justify-content-center">
-                        <span class="fs-1 fw-bold"><img th:src="@{/assets/img/logo.png}" class="img-fluid"></span>
+                        <span class="fs-1 fw-bold"><img th:src="@{assets/img/logo.png}" class="img-fluid"></span>
                     </div>
                     <div class="form-floating mb-3">
                         <input class="form-control" id="username" name="username" type="text" th:placeholder="#{input.placeholder.username}" required/>

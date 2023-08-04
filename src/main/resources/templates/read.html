@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{/layout :: setContent(~{this :: title}, ~{this :: link}, ~{this :: content})}">
+      th:replace="~{layout :: setContent(~{this :: title}, ~{this :: link}, ~{this :: content})}">
 <header>
     <title th:text="#{title.read}">Notice Board Read</title>
     <th:block th:fragment="link"></th:block>

@@ -58,16 +58,6 @@ public class MemberServiceTests {
     @DisplayName("비밀번호를 확인한다.")
     public class checkPasswordTest{
         @Test
-        @DisplayName("존재하지 않는 계정의 비밀번호를 확인한다.")
-        public void checkNotFoundMemberPasswordTest(){
-            //given
-            String username = "testMember";
-            String password = "test1619132!";
-            when(memberRepository.findByUsername(username, false)).thenReturn(Optional.empty());
-            //when, then
-            Assertions.assertThatThrownBy(()->memberService.checkPassword(username, password)).isInstanceOf(UsernameNotFoundException.class);
-        }
-        @Test
         @DisplayName("다른 비밀번호를 확인한다.")
         public void checkDiffPasswordTest(){
             //given

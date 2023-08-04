@@ -6,8 +6,10 @@ import com.example.noticeboard.dto.PageResultDTO;
 import com.example.noticeboard.dto.PagingBoardDTO;
 import com.example.noticeboard.entity.Board;
 import com.example.noticeboard.entity.member.Member;
+import com.example.noticeboard.exception.custom_exception.AccessDeniedException;
+import com.example.noticeboard.exception.custom_exception.BoardNotfoundException;
 import com.example.noticeboard.exception.custom_exception.DuplicateException;
-import com.example.noticeboard.exception.custom_exception.NotFoundException;
+import com.example.noticeboard.exception.custom_exception.SelfRecommendException;
 import com.example.noticeboard.repository.MemberBoardRepository;
 import com.example.noticeboard.repository.boardrepository.BoardRepository;
 import com.example.noticeboard.security.dto.MemberDTO;
@@ -20,9 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.security.access.AccessDeniedException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -115,7 +115,7 @@ public class BoardServiceTests {
             when(boardRepository.getBoard(id))
                     .thenReturn(new HashMap<>());
             //when, then
-            Assertions.assertThatThrownBy(()->boardServiceImpl.getBoard(id)).isInstanceOf(NotFoundException.class);
+            Assertions.assertThatThrownBy(()->boardServiceImpl.getBoard(id)).isInstanceOf(BoardNotfoundException.class);
         }
         @DisplayName("존재하는 게시글을 가져온다.")
         @Test
@@ -148,7 +148,7 @@ public class BoardServiceTests {
             MemberDTO memberDTO = MemberDTO.builder().build();
             when(boardRepository.findById(100l)).thenReturn(Optional.empty());
             //when, then
-            Assertions.assertThatThrownBy(()->boardServiceImpl.recommendBoard(id, memberDTO)).isInstanceOf(NotFoundException.class);
+            Assertions.assertThatThrownBy(()->boardServiceImpl.recommendBoard(id, memberDTO)).isInstanceOf(BoardNotfoundException.class);
         }
         @Test
         @DisplayName("자신이 쓴 게시글을 추천한다.")
@@ -158,7 +158,7 @@ public class BoardServiceTests {
             MemberDTO memberDTO = MemberDTO.builder().username("testUsername").build();
             when(boardRepository.findById(1l)).thenReturn(Optional.of(Board.builder().member(Member.builder().username("testUsername").build()).build()));
             //when,then
-            Assertions.assertThatThrownBy(()->boardServiceImpl.recommendBoard(id, memberDTO)).isInstanceOf(AccessDeniedException.class);
+            Assertions.assertThatThrownBy(()->boardServiceImpl.recommendBoard(id, memberDTO)).isInstanceOf(SelfRecommendException.class);
         }
         @Test
         @DisplayName("이미 추천한 게시글에 추천한다.")
@@ -198,7 +198,7 @@ public class BoardServiceTests {
             MemberDTO memberDTO = MemberDTO.builder().username("testUsername").build();
             when(boardRepository.getBoardWithImage(100l)).thenReturn(Optional.empty());
             //when, then
-            Assertions.assertThatThrownBy(()->boardServiceImpl.removeBoard(id, memberDTO)).isInstanceOf(NotFoundException.class);
+            Assertions.assertThatThrownBy(()->boardServiceImpl.removeBoard(id, memberDTO)).isInstanceOf(BoardNotfoundException.class);
         }
         @DisplayName("자신이 쓰지않은 게시글을 삭제한다.")
         @Test
@@ -235,7 +235,7 @@ public class BoardServiceTests {
             MemberDTO memberDTO = MemberDTO.builder().username("testUsername").build();
             when(boardRepository.findById(100l)).thenReturn(Optional.empty());
             //when, then
-            Assertions.assertThatThrownBy(()->boardServiceImpl.modifyBoard(boardDTO, memberDTO)).isInstanceOf(NotFoundException.class);
+            Assertions.assertThatThrownBy(()->boardServiceImpl.modifyBoard(boardDTO, memberDTO)).isInstanceOf(BoardNotfoundException.class);
         }
         @DisplayName("자신이 쓰지않은 않은 게시글을 수정한다.")
         @Test

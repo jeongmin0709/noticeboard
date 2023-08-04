@@ -1,15 +1,14 @@
 package com.example.noticeboard.service;
 
 import com.example.noticeboard.dto.CommentDTO;
-import com.example.noticeboard.dto.PageRequestDTO;
 import com.example.noticeboard.dto.SliceRequestDTO;
 import com.example.noticeboard.dto.SliceResultDTO;
 import com.example.noticeboard.entity.Board;
 import com.example.noticeboard.entity.Comment;
 import com.example.noticeboard.entity.member.Member;
 import com.example.noticeboard.exception.custom_exception.AccessDeniedException;
+import com.example.noticeboard.exception.custom_exception.CommentNotFoundException;
 import com.example.noticeboard.exception.custom_exception.DuplicateException;
-import com.example.noticeboard.exception.custom_exception.NotFoundException;
 import com.example.noticeboard.repository.MemberCommentRepository;
 import com.example.noticeboard.repository.commentRepository.CommentRepository;
 import com.example.noticeboard.security.dto.MemberDTO;
@@ -20,15 +19,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.SliceImpl;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -128,7 +122,7 @@ public class CommentServiceTests {
             MemberDTO memberDTO = MemberDTO.builder().build();
             when(commentRepository.findById(1l)).thenReturn(Optional.empty());
             //when, then
-            Assertions.assertThatThrownBy(()->commentService.recommend(id, memberDTO)).isInstanceOf(NotFoundException.class);
+            Assertions.assertThatThrownBy(()->commentService.recommend(id, memberDTO)).isInstanceOf(CommentNotFoundException.class);
         }
         @Test
         @DisplayName("자신이 쓴 댓글을 추천한다.")

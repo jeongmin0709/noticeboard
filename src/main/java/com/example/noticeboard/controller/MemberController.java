@@ -36,7 +36,7 @@ public class MemberController {
     public String signup(Model model){
         log.info("회원가입 페이지 요청");
         model.addAttribute("memberDTO", new MemberSaveForm());
-        return "/signup";
+        return "signup";
     }
 
     @PostMapping("/members")
@@ -53,7 +53,7 @@ public class MemberController {
         AuthCodeResultDTO authCodeResultDTO = emailService.checkAuthCode(memberSaveDTO.getEmail(), memberSaveDTO.getCode());
         if(!authCodeResultDTO.getIsAuthentication()) bindingResult.rejectValue("code", authCodeResultDTO.getCode());
 
-        if(bindingResult.hasErrors()){ return "/signup"; }
+        if(bindingResult.hasErrors()){ return "signup"; }
 
         MemberDTO memberDTO = MemberDTO.builder()
                 .username(memberSaveDTO.getUsername())
@@ -76,7 +76,7 @@ public class MemberController {
         if (uri != null && !uri.contains("/loginForm")) {
             request.getSession().setAttribute("prevPage", uri);
         }
-        return "/loginForm";
+        return "loginForm";
     }
 
     @GetMapping("/userInfo")
@@ -84,7 +84,7 @@ public class MemberController {
     public String userInfo(@AuthenticationPrincipal MemberDTO memberDTO, Model model){
         log.info("유저 정보 페이지 요청: {}", memberDTO);
         model.addAttribute("memberDTO", memberDTO);
-        return "/userInfo";
+        return "userInfo";
     }
 
 
@@ -93,7 +93,7 @@ public class MemberController {
     public String findUsernameForm(Model model) {
         log.info("아이디 찾기 페이지 요청");
         model.addAttribute("memberDTO", new FindUsernameForm());
-        return "/find-username";
+        return "find-username";
     }
 
 
@@ -102,7 +102,7 @@ public class MemberController {
     public String findPasswordForm(Model model){
         log.info("비밀번호 찾기 페이지 요청");
         model.addAttribute("memberDTO", new FindPasswordForm());
-        return "/find-password";
+        return "find-password";
     }
 
     @PostMapping("/find-username")
@@ -113,10 +113,10 @@ public class MemberController {
         log.info("아이디 찾기 요청");
         AuthCodeResultDTO authCodeResultDTO = emailService.checkAuthCode(findUsernameForm.getEmail(), findUsernameForm.getCode());
         if(!authCodeResultDTO.getIsAuthentication()) bindingResult.rejectValue("code", authCodeResultDTO.getCode());
-        if(bindingResult.hasErrors()){ return "/find-username"; }
+        if(bindingResult.hasErrors()){ return "find-username"; }
         List<Map<String, Object>> usernameList = memberService.findUsername(findUsernameForm.getEmail());
         model.addAttribute("usernameList", usernameList);
-        return "/result-find-username";
+        return "result-find-username";
     }
 
     @PostMapping("/find-password")
@@ -128,10 +128,10 @@ public class MemberController {
         //유효성 검사
         AuthCodeResultDTO authCodeResultDTO = emailService.checkAuthCode(findPasswordForm.getEmail(), findPasswordForm.getCode());
         if(!authCodeResultDTO.getIsAuthentication()) bindingResult.rejectValue("code", authCodeResultDTO.getCode());
-        if(bindingResult.hasErrors()){ return "/find-password"; }
+        if(bindingResult.hasErrors()){ return "find-password"; }
         String tempPassword = memberService.findPassword(findPasswordForm.getUsername());
         model.addAttribute("tempPassword", tempPassword);
-        return "/result-find-password";
+        return "result-find-password";
     }
 
 }
