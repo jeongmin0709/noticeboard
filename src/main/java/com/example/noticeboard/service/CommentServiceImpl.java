@@ -106,8 +106,9 @@ public class CommentServiceImpl implements CommentService {
         if(result.isEmpty()) throw new CommentNotFoundException(ErrorCode.NOT_FOUND_COMMENT);
         Comment comment = result.get();
         if(!memberDTO.getUsername().equals(comment.getMember().getUsername())) throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
-        memberCommentRepository.deleteByComment(Comment.builder().id(id).build());
-        commentRepository.deleteById(id);
+        memberCommentRepository.deleteByComment(comment);
+        commentRepository.deleteByParent(comment);
+        commentRepository.deleteById(comment.getId());
         return id;
     }
 

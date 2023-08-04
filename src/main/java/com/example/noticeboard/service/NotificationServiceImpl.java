@@ -125,8 +125,9 @@ public class NotificationServiceImpl implements NotificationService{
     }
 
     private Notification makeCommentRegisterNotification(Comment comment, String receiver){
+        log.info(receiver);
         String content = comment.getContent();
-        if(content.length() > 30) content = content.substring(0, 20) + "...";
+        if(content.length() > 30) content = content.substring(0, 30) + "...";
         Notification notification;
         if(comment.getParent() == null){
             notification = Notification.builder()

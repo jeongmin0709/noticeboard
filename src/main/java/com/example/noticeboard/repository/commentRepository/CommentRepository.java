@@ -9,6 +9,11 @@ import org.springframework.data.jpa.repository.Query;
 public interface CommentRepository extends JpaRepository<Comment, Long>, CommentRepositoryCustom {
 
     @Modifying
+    @Query("delete from Comment c where c.board = :board")
     public void deleteByBoard(Board board);
+
+    @Modifying
+    @Query("delete from Comment c where c.parent = :comment")
+    public void deleteByParent(Comment comment);
 
 }

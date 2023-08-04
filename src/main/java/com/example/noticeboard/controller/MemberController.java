@@ -76,8 +76,6 @@ public class MemberController {
         if (uri != null && !uri.contains("/loginForm")) {
             request.getSession().setAttribute("prevPage", uri);
         }
-        String errorMessage = request.getParameter("errorMessage");
-        model.addAttribute("errorMessage", errorMessage);
         return "/loginForm";
     }
 

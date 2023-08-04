@@ -82,7 +82,6 @@ public class EmailServiceImpl implements EmailService{
         EmailAuthToken emailAuthToken = result.get();
         if(!emailAuthToken.getCode().equals(code))
             return AuthCodeResultDTO.builder().isAuthentication(false).code("Equal").message("인증번호가 일치하지 않습니다.").build();
-        log.info("result code: {}", emailAuthToken.getCode());
         return AuthCodeResultDTO.builder().isAuthentication(true).message("인증이 완료되었습니다.").build();
     }
 }

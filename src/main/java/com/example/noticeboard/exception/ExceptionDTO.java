@@ -24,7 +24,7 @@ public class ExceptionDTO {
 
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private final List<ValidationError> fieldErrors;
+        private final List<ValidationError> fieldErrors;
 
     @Getter
     @Builder
